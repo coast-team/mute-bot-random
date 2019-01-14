@@ -1,0 +1,94 @@
+{
+  "name": "mute-bot-random",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node dist/bot-replay.js",
+    "dev": "nodemon --watch src -e js,ts --exec 'npm run build && chmod +x dist/bot-replay.js && node dist/bot-replay.js --cors --logLevel trace | bunyan'",
+    "build": "webpack",
+    "lint": "tslint --fix -p tsconfig.json 'src/**/*.ts' -e 'src/**/*.proto' -e 'src/**/*.d.ts' && prettier --write --list-different 'src/**/*.ts' './*.{ts,js,json,md}'  && markdownlint ./*.md -i 'CHANGELOG.md'",
+    "proto": "pbjs -t static-module -w es6 --no-verify --no-delimited --no-convert src/proto/index.proto -o src/proto/index.es6.js && pbts src/proto/index.es6.js -o src/proto/index.d.ts",
+    "postproto": "babel --presets env -o src/proto/index.js src/proto/index.es6.js && rm src/proto/index.es6.js",
+    "cz": "git-cz",
+    "precommit": "lint-staged && npm run build && git add dist/*",
+    "commitmsg": "commitlint -e $GIT_PARAMS",
+    "prerelease": "npm run build && git add dist/*",
+    "release": "standard-version --no-verify"
+  },
+  "files": [
+    "dist/server.js"
+  ],
+  "keywords": [
+    "bot",
+    "crdt",
+    "peer-network"
+  ],
+  "author": "",
+  "engines": {
+    "node": ">=8.1.4"
+  },
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "@coast-team/mute-core": "^9.1.2",
+    "@coast-team/mute-crypto": "^0.4.1",
+    "commander": "^2.19.0",
+    "netflux": "^4.3.1",
+    "node-webcrypto-ossl": "^1.0.39",
+    "rxjs": "^6.3.3",
+    "protobufjs": "^6.8.8",
+    "text-encoding": "^0.6.4",
+    "uws": "10.148.1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^7.1.2",
+    "@commitlint/config-conventional": "^7.1.2",
+    "@types/node": "^8.10.29",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "commitizen": "^2.10.1",
+    "cz-conventional-changelog": "^2.1.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.2.2",
+    "markdownlint-cli": "^0.13.0",
+    "nodemon": "^1.18.4",
+    "prettier": "^1.14.2",
+    "standard-version": "^4.4.0",
+    "ts-loader": "^5.0.0",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "typescript": "^3.0.3",
+    "validate-commit-msg": "^2.11.1",
+    "webpack": "^4.17.2",
+    "webpack-cli": "^3.1.0",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-conventional-changelog"
+    }
+  },
+  "lint-staged": {
+    "linters": {
+      "*.md": [
+        "prettier --write --list-different",
+        "git add",
+        "markdownlint -i 'CHANGELOG.md'"
+      ],
+      "*.ts": [
+        "tslint --fix -p tsconfig.json -e src/proto/* -e 'src/**/*.d.ts'",
+        "git add"
+      ],
+      "*.{ts,json,scss,css}": [
+        "prettier --write --list-different -e *proto*",
+        "git add"
+      ]
+    },
+    "concurrent": false
+  }
+}
