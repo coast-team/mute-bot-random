@@ -6,6 +6,7 @@ import { BotRandom } from './BotRandom'
 
 export interface IParams {
   botname: string
+  port: number
   crdt: Strategy
   key: string
   rtcConfiguration: {
@@ -17,6 +18,7 @@ export interface IParams {
 class App {
   private default: IParams = {
     botname: 'Jean-Paul',
+    port: 20001,
     crdt: Strategy.LOGOOTSPLIT,
     key: 'test',
     rtcConfiguration: {
@@ -42,7 +44,7 @@ class App {
     })*/
 
     const bot = new Bot({
-      url: 'ws://localhost:20001',
+      url: 'ws://localhost:' + program.port,
       server,
       webGroupOptions: {
         rtcConfiguration: {
@@ -60,8 +62,9 @@ class App {
       console.log('On WebGroup : ', wg.key)
       const botrandom = new BotRandom('Jean-Paul', wg)
       setTimeout(() => {
-        botrandom.doChanges()
-      }, 5000)
+        console.log('Changes start !')
+        botrandom.doChanges(1000, 500, 0, 50)
+      }, 2000)
     }
   }
 
@@ -82,6 +85,7 @@ class App {
     program
       .version(version)
       .option('-n, --botname [name]', 'The name of the bot', this.default.botname)
+      .option('-p, --port [port]', 'The bot server port', this.default.port)
       .parse(process.argv)
   }
 }
@@ -92,4 +96,4 @@ new App(server)
 server.on('error', (err) => {
   console.log('ERROR', err)
 })
-server.listen(20001, '0.0.0.0')
+server.listen(program.port, '0.0.0.0')

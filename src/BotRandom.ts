@@ -59,14 +59,43 @@ export class BotRandom {
     console.log(`${this.botname} - State : `, this.mutecore.state.sequenceCRDT.str)
   }
 
-  doChanges() {
-    this.docChanges.next([{ index: 0, text: 'H' }])
-    this.docChanges.next([{ index: 1, text: 'e' }])
-    this.docChanges.next([{ index: 2, text: 'l' }])
-    this.docChanges.next([{ index: 3, text: 'l' }])
-    this.docChanges.next([{ index: 4, text: 'o' }])
+  async doChanges(nboperation: number, time: number, pDeplacement: number, pDeletion: number) {
+    const stats = { insertion: 0, deletion: 0, deplacement: 0, str: 0 }
 
-    console.log(`${this.botname} - State : `, this.mutecore.state.sequenceCRDT.str)
+    let cpt = 0
+    let index = -1
+
+    while (cpt < nboperation) {
+      const dep = this.random(99) < pDeplacement
+      if (dep || index === -1) {
+        index = this.random(this.mutecore.state.sequenceCRDT.str.length)
+        console.log('---')
+        stats.deplacement++
+      }
+
+      const del = this.random(99) < pDeletion && index > 0
+      if (del) {
+        console.log(`Delete ${index - 1}`)
+        this.docChanges.next([{ index: index - 1, length: 1 }])
+        index--
+        stats.deletion++
+      } else {
+        const c = this.randomChar()
+        console.log(`Insert ${index} \t${c}`)
+        this.docChanges.next([{ index, text: c }])
+        index++
+        stats.insertion++
+      }
+
+      await this.wait(time)
+      cpt++
+    }
+    stats.str = this.mutecore.state.sequenceCRDT.str.length
+    console.log('Stats : ', stats)
+  }
+
+  wait(milisecond: number) {
+    return new Promise((resolve) => setTimeout(resolve, milisecond))
   }
 
   join(key: string) {
@@ -76,19 +105,19 @@ export class BotRandom {
   send(streamId: number, content: Uint8Array, id?: number) {
     const msg = Message.create({ streamId, content })
     if (id === undefined) {
-      console.log(`${this.botname} - broadcast message ${streamId}`)
       this.wg.send(Message.encode(msg).finish())
     } else {
       id = id === 0 ? this.randomMember() : id
-      console.log(`${this.botname} - send message ${streamId}`)
       this.wg.sendTo(id, Message.encode(msg).finish())
     }
   }
 
+  // INIT WEBGROUP
+
   initWebGroup() {
     this.wg.onStateChange = (state: WebGroupState) => {
+      console.log('State : ', state)
       this.stateSubject.next(state)
-      console.log(`${this.botname} - State change : `, state)
     }
 
     this.wg.onMemberJoin = (id) => this.memberJoinSubject.next(id)
@@ -132,7 +161,7 @@ export class BotRandom {
       },
       docContent: state,
       metaTitle: {
-        title: '',
+        title: 'Untitled Document',
         titleModified: 0,
       },
       metaFixData: {
@@ -214,6 +243,15 @@ export class BotRandom {
     this.memberJoinSubject.complete()
     this.memberLeaveSubject.complete()
     this.messageSubject.complete()
+  }
+
+  private random(max: number) {
+    return Math.floor(Math.random() * (max + 1))
+  }
+
+  private randomChar() {
+    const available = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ !:;.?'
+    return available.charAt(this.random(available.length - 1))
   }
 
   private randomMember(): number {
