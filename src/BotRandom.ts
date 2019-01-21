@@ -30,8 +30,6 @@ export class BotRandom {
   private botname: string
   private strategy: Strategy = Strategy.LOGOOTSPLIT
 
-  private memberJoinSubject: Subject<number>
-  private memberLeaveSubject: Subject<number>
   private messageSubject: Subject<{ streamId: number; content: Uint8Array; senderId: number }>
 
   private crypto: Symmetric
@@ -39,8 +37,6 @@ export class BotRandom {
   private docChanges: Subject<IDocContentOperation[]>
 
   constructor(botname: string, master: string, port: number) {
-    this.memberJoinSubject = new Subject()
-    this.memberLeaveSubject = new Subject()
     this.messageSubject = new Subject()
     this.docChanges = new Subject()
     this.synchronize = () => {}
@@ -49,6 +45,10 @@ export class BotRandom {
     this.crypto = new Symmetric()
     this.mutecore = this.initMuteCore()
     this.network = this.initNetwork(this.mutecore.myMuteCoreId, master, port)
+
+    // Collaborators
+    this.mutecore.memberJoin$ = this.network.memberJoin$
+    this.mutecore.memberLeave$ = this.network.memberLeave$
 
     console.log(`${this.botname} - State : `, this.mutecore.state.sequenceCRDT.str)
     console.log(`${this.botname} - Network : ${this.network.id}`)
@@ -87,6 +87,7 @@ export class BotRandom {
     }
     stats.str = this.mutecore.state.sequenceCRDT.str.length
     console.log('Stats : ', stats)
+    console.log('Final str : ', this.mutecore.state.sequenceCRDT.str)
   }
 
   wait(milisecond: number) {
@@ -96,19 +97,36 @@ export class BotRandom {
   send(streamId: number, content: Uint8Array, id?: number) {
     const msg = Message.create({ streamId, content })
     if (id) {
-      console.log('Unicast not implemented yet')
+      this.network.sendTo(id, {
+        type: MessageType.MESSAGE,
+        senderId: this.network.id,
+        content: Message.encode(msg).finish(),
+      })
     } else {
-      this.network.broascast({ type: MessageType.MESSAGE, content: msg })
+      this.network.broascast({
+        type: MessageType.MESSAGE,
+        senderId: this.network.id,
+        content: Message.encode(msg).finish(),
+      })
     }
   }
 
   // INIT NETWORK
   initNetwork(id: number, master: string, port: number) {
     const network = new NetworkNode(id, master, port)
-    network.output$.subscribe((msg) => {
-      console.log('MESSAGE : ', typeof msg)
-      console.log(msg)
+
+    network.output$.subscribe((out) => {
+      const decode = Message.decode(out.message)
+      if (decode) {
+        // console.log('receive', decode.streamId)
+        this.messageSubject.next({
+          streamId: decode.streamId,
+          content: decode.content,
+          senderId: out.sender,
+        })
+      }
     })
+
     return network
   }
 
@@ -144,7 +162,7 @@ export class BotRandom {
 
     // Metadata
     mutecore.remoteMetadataUpdate$.subscribe(({ type, data }) => {
-      console.log(`${this.botname} - Metadata update type:${type}, data : `, data)
+      // console.log(`${this.botname} - Metadata update type:${type}, data : `, data)
       if (type === MetaDataType.FixData) {
         const { cryptoKey } = data as FixDataState
         if (cryptoKey) {
@@ -161,6 +179,7 @@ export class BotRandom {
         this.crypto &&
         this.crypto.state === KeyState.READY
       ) {
+        console.log('OUT', recipientId)
         this.crypto
           .encrypt(content)
           .then((encryptedContent) => this.send(streamId, encryptedContent, recipientId))
@@ -184,10 +203,6 @@ export class BotRandom {
       })
     )
 
-    // Collaborators
-    mutecore.memberJoin$ = this.memberJoinSubject.asObservable()
-    mutecore.memberLeave$ = this.memberLeaveSubject.asObservable()
-
     // Synchronization mechanism
     this.synchronize = () => {
       if (this.crypto) {
@@ -204,8 +219,6 @@ export class BotRandom {
   }
 
   destroy() {
-    this.memberJoinSubject.complete()
-    this.memberLeaveSubject.complete()
     this.messageSubject.complete()
   }
 

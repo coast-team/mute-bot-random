@@ -18,12 +18,14 @@ program
   .version(version)
   .option('-m, --master [url]', 'Master Url')
   .option('-p, --port [port]', 'The bot server port', 20001)
+  .option('-n, --namebot [name]', 'the name of the bot', 'Bob')
   .parse(process.argv)
 
-/*console.log('Start : port', program.port, ' - master', program.master)
-const network = new NetworkNode(program.master, program.port)
+console.log('Start : port', program.port, ' - master', program.master)
+// new NetworkNode(program.port, program.master, program.port)
 
-const input = new Subject<string>()
-network.input$ = input.asObservable()*/
+const bot = new BotRandom(program.namebot, program.master, program.port)
 
-new BotRandom('Bob', program.master, program.port)
+setTimeout(() => {
+  bot.doChanges(10, 1000, 0, 0)
+}, 10000)

@@ -1,16 +1,16 @@
 import { Observable, Subject } from 'rxjs'
 import * as WebSocket from 'ws'
+import { NetworkMessage } from './proto'
 
 export enum MessageType {
-  PEERS_LIST_QUERY,
-  PEERS_LIST_RESPONSE,
   CONNECTION,
   CONNECTION_RESPONSE,
   MESSAGE,
 }
 
-export interface INetworkMessage {
+export interface INetworkMessageInfo {
   type: MessageType
+  senderId: number
   content?: any
 }
 
@@ -21,13 +21,35 @@ export interface INetworkNodeInfo {
 }
 
 export class NetworkNode {
+  // --------------------------------------------------------------------------------------
+  public set input$(source: Observable<string>) {
+    source.subscribe((msge: string) => {
+      this.broascast({ type: MessageType.MESSAGE, senderId: this.myId, content: msge })
+    })
+  }
+
+  public get output$(): Observable<any> {
+    return this.output.asObservable()
+  }
+
+  public get memberJoin$(): Observable<number> {
+    return this.memberJoin.asObservable()
+  }
+
+  public get memberLeave$(): Observable<number> {
+    return this.memberLeave.asObservable()
+  }
+
+  public get id() {
+    return this.myId
+  }
   private myId: number
   private masterUrl: string
   private myUrl: string
   private peerList: INetworkNodeInfo[]
   private server: WebSocket.Server
 
-  private output: Subject<string>
+  private output: Subject<{ sender: number; message: any }>
   private memberJoin: Subject<number>
   private memberLeave: Subject<number>
 
@@ -51,9 +73,8 @@ export class NetworkNode {
       wsMaster.onopen = () => {
         this.send(wsMaster, {
           type: MessageType.CONNECTION,
-          content: { url: this.myUrl, id: this.myId },
+          senderId: this.myId,
         })
-        this.send(wsMaster, { type: MessageType.PEERS_LIST_QUERY })
       }
     }
   }
@@ -63,7 +84,10 @@ export class NetworkNode {
     const ws = new WebSocket(url)
 
     ws.onopen = () => {
-      this.send(ws, { type: MessageType.CONNECTION, content: { id: this.myId, url: this.myUrl } })
+      this.send(ws, {
+        type: MessageType.CONNECTION,
+        senderId: this.myId,
+      })
     }
     ws.onmessage = (data) => {
       this.receive(data.target, data.data)
@@ -74,80 +98,84 @@ export class NetworkNode {
     return ws
   }
 
-  public broascast(message: INetworkMessage) {
+  public broascast(message: INetworkMessageInfo) {
     this.peerList.forEach(({ ws }) => {
       this.send(ws, message)
     })
   }
 
-  public send(target: WebSocket, data: INetworkMessage) {
-    target.send(JSON.stringify(data))
+  public sendTo(id: number, message: INetworkMessageInfo) {
+    const index = this.peerList.findIndex((value) => {
+      return id === value.id
+    })
+    this.send(this.peerList[index].ws, message)
   }
 
   public receive(from: WebSocket, data: WebSocket.Data) {
-    const message = JSON.parse(data.toString())
+    const message = NetworkMessage.decode(data as Uint8Array)
     switch (message.type) {
-      case MessageType.PEERS_LIST_QUERY:
-        console.log(`---> PEER_LIST_QUERY`)
-        this.send(from, {
-          type: MessageType.PEERS_LIST_RESPONSE,
-          content: this.peerAddresse(),
-        })
-        break
-
-      case MessageType.PEERS_LIST_RESPONSE:
-        console.log(`---> PEER_LIST_RESPONSE`, message.content)
-        const array = message.content
-        array.forEach((value: string) => {
-          if (value !== this.myUrl) {
-            this.connect(value)
-          }
-        })
-        break
-
       case MessageType.CONNECTION:
-        console.log(`---> CONNECTION`, message.content)
-        from.url = message.content.url
-        this.addPeer({ id: message.content.id, url: message.content.url, ws: from })
-        this.send(from, {
-          type: MessageType.CONNECTION_RESPONSE,
-          content: { id: this.myId, url: this.myUrl },
-        })
+        // console.log(`---> CONNECTION`, message.connection)
+        const connection = message.connection
+        if (connection && connection.url) {
+          from.url = connection.url
+          this.addPeer({ id: message.senderId, url: connection.url, ws: from })
+          this.send(from, {
+            type: MessageType.CONNECTION_RESPONSE,
+            senderId: this.myId,
+          })
+        }
         break
 
       case MessageType.CONNECTION_RESPONSE:
-        console.log(`---> CONNECTION_RESPONSE`, message.content)
-        this.addPeer({ id: message.content.id, url: message.content.url, ws: from })
+        // console.log(`---> CONNECTION_RESPONSE`, message.connectionResponse)
+        const connectionResponse = message.connectionResponse
+        if (connectionResponse && connectionResponse.url && connectionResponse.list) {
+          this.addPeer({ id: message.senderId, url: connectionResponse.url, ws: from })
+          const array = connectionResponse.list
+          array.forEach((value: string) => {
+            if (value !== this.myUrl && !this.hasPeer(value)) {
+              this.connect(value)
+            }
+          })
+        }
         break
 
       case MessageType.MESSAGE:
-        console.log(`---> MESSAGE`)
-        this.output.next(message.content)
+        // console.log(`---> MESSAGE`, message.senderId)
+        this.output.next({ sender: message.senderId, message: message.mutecoreMessage })
         break
     }
   }
 
-  // --------------------------------------------------------------------------------------
-  public set input$(source: Observable<string>) {
-    source.subscribe((msge: string) => {
-      this.broascast({ type: MessageType.MESSAGE, content: msge })
-    })
-  }
-
-  public get output$(): Observable<string> {
-    return this.output.asObservable()
-  }
-
-  public get memberJoin$(): Observable<number> {
-    return this.memberJoin.asObservable()
-  }
-
-  public get memberLeave$(): Observable<number> {
-    return this.memberLeave.asObservable()
-  }
-
-  public get id() {
-    return this.myId
+  private send(target: WebSocket, data: INetworkMessageInfo) {
+    let msg = {}
+    switch (data.type) {
+      case MessageType.CONNECTION:
+        msg = NetworkMessage.create({
+          type: data.type,
+          senderId: data.senderId,
+          connection: { url: this.myUrl },
+        })
+        break
+      case MessageType.CONNECTION_RESPONSE:
+        msg = NetworkMessage.create({
+          type: data.type,
+          senderId: data.senderId,
+          connectionResponse: { url: this.myUrl, list: this.peerAddresse() },
+        })
+        break
+      case MessageType.MESSAGE:
+        msg = NetworkMessage.create({
+          type: data.type,
+          senderId: data.senderId,
+          mutecoreMessage: data.content,
+        })
+        break
+      default:
+        throw new Error('error while sending data : data.type unknown')
+    }
+    target.send(NetworkMessage.encode(msg).finish())
   }
 
   private addPeer(info: INetworkNodeInfo) {
@@ -160,15 +188,24 @@ export class NetworkNode {
     const index = this.peerList.findIndex((value) => {
       return url === value.url
     })
-    this.memberLeave.next(this.peerList[index].id)
-    this.peerList.splice(index, 1)
-    console.log('server : Peer LEAVE : ', this.peerListToString())
+    if (index !== -1) {
+      this.memberLeave.next(this.peerList[index].id)
+      this.peerList.splice(index, 1)
+      console.log('Peer LEAVE : ', this.peerListToString())
+    }
   }
 
   private peerListToString() {
     return this.peerList.map(({ id, url }) => {
       return { id, url }
     })
+  }
+
+  private hasPeer(url: string): boolean {
+    const index = this.peerList.findIndex((value) => {
+      return url === value.url
+    })
+    return index !== -1
   }
 
   private peerAddresse(): string[] {

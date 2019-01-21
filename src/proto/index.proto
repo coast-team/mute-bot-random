@@ -1,5 +1,26 @@
 syntax = "proto3";
 
+
+message Connection {
+  string url = 1;
+}
+
+message ConnectionResponse {
+  string url = 1;
+  repeated string list = 2;
+}
+
+message NetworkMessage {
+  uint32 type = 1;
+  uint32 senderId = 2;
+  oneof content {
+    Connection connection = 3;
+    ConnectionResponse connectionResponse = 4;
+    bytes mutecoreMessage = 5;
+  }
+}
+
+
 message Message {
   uint32 streamId = 1;
   bytes content = 2;
