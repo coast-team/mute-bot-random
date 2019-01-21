@@ -9,6 +9,9 @@ yarn.lock
 /node_modules
 /bower_components
 
+# build
+/dist
+
 # IDEs and editors
 /.idea
 /.vscode
@@ -36,4 +39,3 @@ testem.log
 .DS_Store
 Thumbs.db
 
-dist/bot-replay.js

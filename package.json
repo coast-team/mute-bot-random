@@ -24,7 +24,7 @@
     "crdt",
     "peer-network"
   ],
-  "author": "",
+  "author": "Cédric Enclos (cedric.enclos@loria.fr)",
   "engines": {
     "node": ">=8.1.4"
   },
@@ -33,17 +33,16 @@
     "@coast-team/mute-core": "^9.1.2",
     "@coast-team/mute-crypto": "^0.4.1",
     "commander": "^2.19.0",
-    "netflux": "^4.3.1",
     "node-webcrypto-ossl": "^1.0.39",
     "rxjs": "^6.3.3",
     "protobufjs": "^6.8.8",
-    "text-encoding": "^0.6.4",
-    "uws": "10.148.1"
+    "ws": "^6.1.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^7.1.2",
     "@commitlint/config-conventional": "^7.1.2",
     "@types/node": "^8.10.29",
+    "@types/ws": "^6.0.1",
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "commitizen": "^2.10.1",
