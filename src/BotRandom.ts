@@ -10,6 +10,8 @@ import {
   TextInsert,
 } from '@coast-team/mute-core'
 import { KeyState, Symmetric } from '@coast-team/mute-crypto'
+import { writeFileSync } from 'fs'
+import { Stats } from 'mute-structs'
 import { Subject } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { MessageType, NetworkNode } from './NetworkNode'
@@ -54,7 +56,12 @@ export class BotRandom {
     console.log(`${this.botname} - Network : ${this.network.id}`)
   }
 
-  async doChanges(nboperation: number, time: number, pDeplacement: number, pDeletion: number) {
+  public async doChanges(
+    nboperation: number,
+    time: number,
+    pDeplacement: number,
+    pDeletion: number
+  ) {
     const stats = { insertion: 0, deletion: 0, deplacement: 0, str: 0 }
 
     let cpt = 0
@@ -90,11 +97,11 @@ export class BotRandom {
     console.log('Final str : ', this.mutecore.state.sequenceCRDT.str)
   }
 
-  wait(milisecond: number) {
+  public wait(milisecond: number) {
     return new Promise((resolve) => setTimeout(resolve, milisecond))
   }
 
-  send(streamId: number, content: Uint8Array, id?: number) {
+  public send(streamId: number, content: Uint8Array, id?: number) {
     const msg = Message.create({ streamId, content })
     if (id) {
       this.network.sendTo(id, {
@@ -111,8 +118,34 @@ export class BotRandom {
     }
   }
 
+  public checkObjective(nboperation: number) {
+    if (nboperation > 0) {
+      const vector = this.mutecore.state.vector
+      let currentOperationNumber = 0
+      vector.forEach((value) => {
+        currentOperationNumber += value + 1
+      })
+      return currentOperationNumber >= nboperation
+    } else {
+      throw new Error('checkObjective : the request number of operation to check is invalid')
+    }
+  }
+
+  public async saveData() {
+    const data = {
+      ...JSON.parse(this.mutecore.state.toJSON()),
+      stats: new Stats(this.mutecore.state.sequenceCRDT).toString(),
+    }
+    console.log(data.stats)
+    await writeFileSync(
+      './Results.' + this.botname + ':' + this.network.id + '.json',
+      JSON.stringify(data)
+    )
+    console.log('Data Saved')
+  }
+
   // INIT NETWORK
-  initNetwork(id: number, master: string, port: number) {
+  public initNetwork(id: number, master: string, port: number) {
     const network = new NetworkNode(id, master, port)
 
     network.output$.subscribe((out) => {
@@ -132,7 +165,7 @@ export class BotRandom {
 
   // INIT MUTECORE
 
-  initMuteCore() {
+  public initMuteCore() {
     const state = StateStrategy.emptyState(this.strategy)
     if (!state) {
       throw new Error('state is null')
@@ -205,15 +238,12 @@ export class BotRandom {
 
     // Synchronization mechanism
     this.synchronize = () => {
-      if (this.crypto) {
-        if (this.crypto.state === KeyState.READY) {
-          mutecore.synchronize()
-        }
-      } else {
-        mutecore.synchronize()
-      }
+      mutecore.synchronize()
     }
-    mutecore.collabJoin$.subscribe(() => this.synchronize())
+    mutecore.collabJoin$.subscribe(() => {
+      console.log('New collaborator')
+      this.synchronize()
+    })
 
     return mutecore
   }
