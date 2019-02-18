@@ -39,8 +39,8 @@ setTimeout(() => {
 setInterval(() => {
   if (bot.checkObjective(program.objective)) {
     console.log('FINISH')
-    bot.saveData().then(() => {
-      console.log('Data saved')
+    bot.terminate().then(() => {
+      console.log('Exit')
       process.exit(0)
     })
   }

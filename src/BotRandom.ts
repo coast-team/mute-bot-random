@@ -10,8 +10,9 @@ import {
   TextInsert,
 } from '@coast-team/mute-core'
 import { KeyState, Symmetric } from '@coast-team/mute-crypto'
-import { writeFileSync } from 'fs'
+import { appendFile, appendFileSync } from 'fs'
 import { Stats } from 'mute-structs'
+import * as os from 'os'
 import { Subject } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { MessageType, NetworkNode } from './NetworkNode'
@@ -32,6 +33,8 @@ export class BotRandom {
   private botname: string
   private strategy: Strategy = Strategy.LOGOOTSPLIT
 
+  private start: boolean
+
   private messageSubject: Subject<{ streamId: number; content: Uint8Array; senderId: number }>
 
   private crypto: Symmetric
@@ -42,6 +45,8 @@ export class BotRandom {
     this.messageSubject = new Subject()
     this.docChanges = new Subject()
     this.synchronize = () => {}
+
+    this.start = true
 
     this.botname = botname
     this.crypto = new Symmetric()
@@ -131,16 +136,18 @@ export class BotRandom {
     }
   }
 
-  public async saveData() {
+  public async terminate() {
     const data = {
-      ...JSON.parse(this.mutecore.state.toJSON()),
+      vector: Array.from(this.mutecore.state.vector),
+      sequenceCRDT: this.mutecore.state.sequenceCRDT,
       stats: new Stats(this.mutecore.state.sequenceCRDT).toString(),
     }
     console.log(data.stats)
-    await writeFileSync(
+    appendFileSync('./Logs.' + this.botname + ':' + this.network.id + '.json', ']')
+    /* await writeFileSync(
       './Results.' + this.botname + ':' + this.network.id + '.json',
       JSON.stringify(data)
-    )
+    ) */
     console.log('Data Saved')
   }
 
@@ -235,6 +242,24 @@ export class BotRandom {
         })
       })
     )
+
+    mutecore.experimentLogs$.subscribe((value) => {
+      console.log(value)
+      let prefix = ',' + os.EOL
+      if (this.start) {
+        prefix = '['
+        this.start = false
+      }
+      appendFile(
+        './Logs.' + this.botname + ':' + this.network.id + '.json',
+        prefix + JSON.stringify(value),
+        (err) => {
+          if (err) {
+            throw err
+          }
+        }
+      )
+    })
 
     // Synchronization mechanism
     this.synchronize = () => {
