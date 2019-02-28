@@ -10,7 +10,7 @@ import {
   TextInsert,
 } from '@coast-team/mute-core'
 import { KeyState, Symmetric } from '@coast-team/mute-crypto'
-import { appendFile, appendFileSync } from 'fs'
+import { appendFile, appendFileSync, writeFileSync } from 'fs'
 import { Stats } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
@@ -31,6 +31,8 @@ export class BotRandom {
   private network: NetworkNode
   private mutecore: MuteCoreTypes
   private botname: string
+  private snapshot: number
+  private cptOperation: number
   private strategy: Strategy = Strategy.LOGOOTSPLIT
 
   private start: boolean
@@ -41,7 +43,7 @@ export class BotRandom {
 
   private docChanges: Subject<IDocContentOperation[]>
 
-  constructor(botname: string, master: string, port: number) {
+  constructor(botname: string, master: string, port: number, snapshot: number) {
     this.messageSubject = new Subject()
     this.docChanges = new Subject()
     this.synchronize = () => {}
@@ -49,6 +51,8 @@ export class BotRandom {
     this.start = true
 
     this.botname = botname
+    this.snapshot = snapshot
+    this.cptOperation = 0
     this.crypto = new Symmetric()
     this.mutecore = this.initMuteCore()
     this.network = this.initNetwork(this.mutecore.myMuteCoreId, master, port)
@@ -64,8 +68,8 @@ export class BotRandom {
   public async doChanges(
     nboperation: number,
     time: number,
-    pDeplacement: number,
-    pDeletion: number
+    pDeletion: number,
+    pDeplacement: number
   ) {
     const stats = { insertion: 0, deletion: 0, deplacement: 0, str: 0 }
 
@@ -143,7 +147,7 @@ export class BotRandom {
       stats: new Stats(this.mutecore.state.sequenceCRDT).toString(),
     }
     console.log(data.stats)
-    appendFileSync('./Logs.' + this.botname + ':' + this.network.id + '.json', ']')
+    await appendFileSync('./Logs.' + this.botname + ':' + this.network.id + '.json', ']')
     /* await writeFileSync(
       './Results.' + this.botname + ':' + this.network.id + '.json',
       JSON.stringify(data)
@@ -244,21 +248,36 @@ export class BotRandom {
     )
 
     mutecore.experimentLogs$.subscribe((value) => {
-      console.log(value)
+      // console.log(value)
       let prefix = ',' + os.EOL
       if (this.start) {
         prefix = '['
         this.start = false
       }
+
+      const { struct, ...logs } = value
       appendFile(
-        './Logs.' + this.botname + ':' + this.network.id + '.json',
-        prefix + JSON.stringify(value),
+        './output/Logs.' + this.botname + ':' + this.network.id + '.json',
+        prefix + JSON.stringify(logs),
         (err) => {
           if (err) {
             throw err
           }
         }
       )
+      this.cptOperation++
+      if (this.cptOperation % this.snapshot === 0) {
+        writeFileSync(
+          './output/Snapshot-' +
+            this.cptOperation +
+            '-' +
+            this.botname +
+            '-' +
+            this.network.id +
+            '.json',
+          JSON.stringify(struct)
+        )
+      }
     })
 
     // Synchronization mechanism
