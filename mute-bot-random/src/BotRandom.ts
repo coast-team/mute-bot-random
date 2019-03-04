@@ -147,7 +147,7 @@ export class BotRandom {
       stats: new Stats(this.mutecore.state.sequenceCRDT).toString(),
     }
     console.log(data.stats)
-    await appendFileSync('./Logs.' + this.botname + ':' + this.network.id + '.json', ']')
+    await appendFileSync('./output/Logs.' + this.botname + ':' + this.network.id + '.json', ']')
     /* await writeFileSync(
       './Results.' + this.botname + ':' + this.network.id + '.json',
       JSON.stringify(data)
