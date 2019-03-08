@@ -1,0 +1,39 @@
+version: '3'
+services: 
+  master:
+    image: "node:latest"
+    user: "node"
+    working_dir: /home/node/app
+    volumes:
+      - ./botrandom/:/home/node/app
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Jean --address master -p 20001 -o 300 --delay 10000 --time 500 -s 100 --deletion 20 --deplacement 5 --operation 100
+  bot1:
+    depends_on:
+      - master
+    image: "node:latest"
+    user: "node"
+    working_dir: /home/node/app
+    volumes:
+      - ./botrandom/:/home/node/app
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Paul -m ws://master:20001 --address bot1 -p 20001 -o 300 --delay 10000 --time 500 -s 100 --deletion 20 --deplacement 5 --operation 100
+  bot2:
+    depends_on:
+      - master
+    image: "node:latest"
+    user: "node"
+    working_dir: /home/node/app
+    volumes:
+      - ./botrandom/:/home/node/app
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Arthur -m ws://master:20001 --address bot2 -p 20001 -o 300 --delay 10000 --time 500 -s 100 --deletion 20 --deplacement 5 --operation 100

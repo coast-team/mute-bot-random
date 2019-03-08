@@ -1,0 +1,31 @@
+{
+  "objective": 300,
+  "delay": 10000,
+  "snapshot": 100,
+  "bots": [
+    {
+      "master": true,
+      "botname": "Jean",
+      "time": 500,
+      "operation": 100,
+      "deletion": 20,
+      "move": 5
+    },
+    {
+      "master": false,
+      "botname": "Paul",
+      "time": 500,
+      "operation": 100,
+      "deletion": 20,
+      "move": 5
+    },
+    {
+      "master": false,
+      "botname": "Arthur",
+      "time": 500,
+      "operation": 100,
+      "deletion": 20,
+      "move": 5
+    }
+  ]
+}
