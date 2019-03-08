@@ -147,7 +147,7 @@ export class BotRandom {
       stats: new Stats(this.mutecore.state.sequenceCRDT).toString(),
     }
     console.log(data.stats)
-    await appendFileSync('./output/Logs.' + this.botname + ':' + this.network.id + '.json', ']')
+    await appendFileSync('./output/Logs.' + this.botname + '.json', ']')
     /* await writeFileSync(
       './Results.' + this.botname + ':' + this.network.id + '.json',
       JSON.stringify(data)
@@ -278,13 +278,7 @@ export class BotRandom {
       this.cptOperation++
       if (this.cptOperation % this.snapshot === 0) {
         writeFileSync(
-          './output/Snapshot-' +
-            this.cptOperation +
-            '-' +
-            this.botname +
-            '-' +
-            this.network.id +
-            '.json',
+          './output/Snapshot.' + this.cptOperation + '.' + this.botname + '.json',
           JSON.stringify(struct)
         )
       }
