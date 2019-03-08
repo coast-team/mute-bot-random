@@ -4,12 +4,21 @@ module.exports = {
   mode: 'production',
   entry: './src/index.ts',
   output: {
-    filename: 'bot-replay.js',
+    filename: 'bot-random.js',
   },
   target: 'node',
   externals: [
     nodeExternals({
-      whitelist: ['netflux', 'mute-structs', '@coast-team/mute-core', '@coast-team/mute-crypto'],
+      whitelist: [
+        'commander',
+        'mute-structs',
+        '@coast-team/mute-core',
+        '@coast-team/mute-crypto',
+        '@coast-team/mute-crypto-helper',
+        'protobuff',
+        'rxjs',
+        'ws',
+      ],
     }),
   ],
   module: {

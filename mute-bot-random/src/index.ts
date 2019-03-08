@@ -25,6 +25,7 @@ program
   .option('--deplacement [deplacement]', 'The probability to move the cursor', 0)
   .option('--time [ms]', 'The time between each operations', 1000)
   .option('--delay [ms]', 'The time before starting', 5000)
+  .option('--address [adr]', 'the adress of the node for exemple ws://[adr]:20001', 'localhost')
   .option(
     '-s, --snapshot [nbOperation]',
     'save a snapshot of the structure every [nbOperation] operations',
@@ -35,7 +36,13 @@ program
 console.log('Start : port', program.port, ' - master', program.master)
 // new NetworkNode(program.port, program.master, program.port)
 
-const bot = new BotRandom(program.namebot, program.master, program.port, program.snapshot)
+const bot = new BotRandom(
+  program.namebot,
+  program.master,
+  program.port,
+  program.address,
+  program.snapshot
+)
 
 setTimeout(() => {
   bot.doChanges(program.operation, program.time, program.deletion, program.deplacement)

@@ -53,7 +53,7 @@ export class NetworkNode {
   private memberJoin: Subject<number>
   private memberLeave: Subject<number>
 
-  constructor(id: number, masterUrl: string, port: number) {
+  constructor(id: number, masterUrl: string, port: number, adr: string) {
     this.myId = id
 
     this.output = new Subject()
@@ -61,7 +61,7 @@ export class NetworkNode {
     this.memberLeave = new Subject()
 
     this.masterUrl = masterUrl
-    this.myUrl = 'ws://localhost:' + port
+    this.myUrl = 'ws://' + adr + ':' + port
     this.peerList = []
 
     this.server = new WebSocket.Server({ port })

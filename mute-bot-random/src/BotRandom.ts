@@ -36,26 +36,26 @@ export class BotRandom {
   private strategy: Strategy = Strategy.LOGOOTSPLIT
 
   private start: boolean
-
   private messageSubject: Subject<{ streamId: number; content: Uint8Array; senderId: number }>
-
   private crypto: Symmetric
-
   private docChanges: Subject<IDocContentOperation[]>
 
-  constructor(botname: string, master: string, port: number, snapshot: number) {
+  private index: number
+
+  constructor(botname: string, master: string, port: number, adr: string, snapshot: number) {
     this.messageSubject = new Subject()
     this.docChanges = new Subject()
     this.synchronize = () => {}
 
     this.start = true
+    this.index = -1
 
     this.botname = botname
     this.snapshot = snapshot
     this.cptOperation = 0
     this.crypto = new Symmetric()
     this.mutecore = this.initMuteCore()
-    this.network = this.initNetwork(this.mutecore.myMuteCoreId, master, port)
+    this.network = this.initNetwork(this.mutecore.myMuteCoreId, master, port, adr)
 
     // Collaborators
     this.mutecore.memberJoin$ = this.network.memberJoin$
@@ -74,27 +74,26 @@ export class BotRandom {
     const stats = { insertion: 0, deletion: 0, deplacement: 0, str: 0 }
 
     let cpt = 0
-    let index = -1
 
     while (cpt < nboperation) {
       const dep = this.random(99) < pDeplacement
-      if (dep || index === -1) {
-        index = this.random(this.mutecore.state.sequenceCRDT.str.length)
+      if (dep || this.index === -1) {
+        this.index = this.random(this.mutecore.state.sequenceCRDT.str.length)
         console.log('---')
         stats.deplacement++
       }
 
-      const del = this.random(99) < pDeletion && index > 0
+      const del = this.random(99) < pDeletion && this.index > 0
       if (del) {
-        console.log(`Delete ${index - 1}`)
-        this.docChanges.next([{ index: index - 1, length: 1 }])
-        index--
+        console.log(`Delete ${this.index - 1}`)
+        this.docChanges.next([{ index: this.index - 1, length: 1 }])
+        this.index--
         stats.deletion++
       } else {
         const c = this.randomChar()
-        console.log(`Insert ${index} \t${c}`)
-        this.docChanges.next([{ index, text: c }])
-        index++
+        console.log(`Insert ${this.index} \t${c}`)
+        this.docChanges.next([{ index: this.index, text: c }])
+        this.index++
         stats.insertion++
       }
 
@@ -102,6 +101,7 @@ export class BotRandom {
       cpt++
     }
     stats.str = this.mutecore.state.sequenceCRDT.str.length
+    this.index = -1
     console.log('Stats : ', stats)
     console.log('Final str : ', this.mutecore.state.sequenceCRDT.str)
   }
@@ -156,8 +156,8 @@ export class BotRandom {
   }
 
   // INIT NETWORK
-  public initNetwork(id: number, master: string, port: number) {
-    const network = new NetworkNode(id, master, port)
+  public initNetwork(id: number, master: string, port: number, adr: string) {
+    const network = new NetworkNode(id, master, port, adr)
 
     network.output$.subscribe((out) => {
       const decode = Message.decode(out.message)
@@ -231,6 +231,16 @@ export class BotRandom {
       } else {
         this.send(streamId, content, recipientId)
       }
+    })
+
+    mutecore.remoteTextOperations$.subscribe(({ operations }) => {
+      operations.forEach((ope) => {
+        if (ope instanceof TextInsert && ope.index < this.index) {
+          this.index += ope.content.length
+        } else if (ope instanceof TextDelete && ope.index < this.index) {
+          this.index -= ope.length
+        }
+      })
     })
 
     mutecore.localTextOperations$ = this.docChanges.asObservable().pipe(

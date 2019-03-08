@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/bot-replay.js",
+    "start": "node dist/bot-random.js",
     "dev": "nodemon --watch src -e js,ts --exec 'npm run build && chmod +x dist/bot-replay.js && node dist/bot-replay.js --cors --logLevel trace | bunyan'",
     "build": "webpack",
     "lint": "tslint --fix -p tsconfig.json 'src/**/*.ts' -e 'src/**/*.proto' -e 'src/**/*.d.ts' && prettier --write --list-different 'src/**/*.ts' './*.{ts,js,json,md}'  && markdownlint ./*.md -i 'CHANGELOG.md'",
@@ -30,7 +30,7 @@
   },
   "license": "AGPL-3.0",
   "dependencies": {
-    "@coast-team/mute-core": "file:../mute-core/coast-team-mute-core-0.0.0-development.tgz",
+    "@coast-team/mute-core": "file:../../mute-core/coast-team-mute-core-0.0.0-development.tgz",
     "@coast-team/mute-crypto": "^0.4.1",
     "commander": "^2.19.0",
     "node-webcrypto-ossl": "^1.0.39",
