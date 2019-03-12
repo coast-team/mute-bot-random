@@ -1,6 +1,6 @@
 var fs = require("fs");
 
-var file = "version: '3'\nservices: \n";
+var file = "version: '3.2'\nservices: \n";
 var conf = JSON.parse(fs.readFileSync("./config.json"));
 
 var cptBot = 1;
@@ -18,11 +18,12 @@ conf.bots.forEach(obj => {
   }
 
   file +=
-    '    image: "node:latest"\n' +
+    "    image: botrandom:latest\n" +
     '    user: "node"\n' +
-    "    working_dir: /home/node/app\n" +
     "    volumes:\n" +
-    "      - ./botrandom/:/home/node/app\n" +
+    "      - type: bind\n" +
+    "        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}\n" +
+    "        target: /home/node/app/output\n" +
     "    command:\n" +
     "      - bash\n" +
     "      - -c\n" +

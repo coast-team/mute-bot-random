@@ -1,0 +1,14 @@
+version: "3.2"
+services:
+  master:
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Jean --address master -p 20001 -o 100 --delay 10000 --time 500 -s 100 --deletion 20 --deplacement 5 --operation 100

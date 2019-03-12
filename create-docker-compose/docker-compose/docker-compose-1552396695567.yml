@@ -1,11 +1,12 @@
-version: '3'
+version: '3.2'
 services: 
   master:
-    image: "node:latest"
+    image: botrandom:latest
     user: "node"
-    working_dir: /home/node/app
     volumes:
-      - ./botrandom/:/home/node/app
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
     command:
       - bash
       - -c
@@ -14,11 +15,12 @@ services:
   bot1:
     depends_on:
       - master
-    image: "node:latest"
+    image: botrandom:latest
     user: "node"
-    working_dir: /home/node/app
     volumes:
-      - ./botrandom/:/home/node/app
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
     command:
       - bash
       - -c
@@ -27,11 +29,12 @@ services:
   bot2:
     depends_on:
       - master
-    image: "node:latest"
+    image: botrandom:latest
     user: "node"
-    working_dir: /home/node/app
     volumes:
-      - ./botrandom/:/home/node/app
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
     command:
       - bash
       - -c
