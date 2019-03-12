@@ -1,29 +1,45 @@
 {
-  "objective": 300,
+  "objective": 50000,
   "delay": 10000,
-  "snapshot": 100,
+  "snapshot": 5000,
   "bots": [
     {
       "master": true,
-      "botname": "Jean",
+      "botname": "Master",
       "time": 500,
-      "operation": 100,
+      "operation": 10000,
       "deletion": 20,
       "move": 5
     },
     {
       "master": false,
-      "botname": "Paul",
+      "botname": "Bot0",
       "time": 500,
-      "operation": 100,
+      "operation": 10000,
       "deletion": 20,
       "move": 5
     },
     {
       "master": false,
-      "botname": "Arthur",
+      "botname": "Bot1",
       "time": 500,
-      "operation": 100,
+      "operation": 10000,
+      "deletion": 20,
+      "move": 5
+    },
+    {
+      "master": false,
+      "botname": "Bot2",
+      "time": 500,
+      "operation": 10000,
+      "deletion": 20,
+      "move": 5
+    },
+    {
+      "master": false,
+      "botname": "Bot3",
+      "time": 500,
+      "operation": 10000,
       "deletion": 20,
       "move": 5
     }
