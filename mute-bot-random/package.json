@@ -30,7 +30,7 @@
   },
   "license": "AGPL-3.0",
   "dependencies": {
-    "@coast-team/mute-core": "file:../../mute-core/coast-team-mute-core-0.0.0-development.tgz",
+    "@coast-team/mute-core": "file:coast-team-mute-core-0.0.0-development.tgz",
     "@coast-team/mute-crypto": "^0.4.1",
     "commander": "^2.19.0",
     "node-webcrypto-ossl": "^1.0.39",

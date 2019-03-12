@@ -267,7 +267,7 @@ export class BotRandom {
 
       const { struct, ...logs } = value
       appendFile(
-        './output/Logs.' + this.botname + ':' + this.network.id + '.json',
+        './output/Logs.' + this.botname + '.json',
         prefix + JSON.stringify(logs),
         (err) => {
           if (err) {
