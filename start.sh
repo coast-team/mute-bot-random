@@ -22,5 +22,4 @@ export BOTRANDOM_EXPERIMENT_NAME=$name
 
 
 
-docker-compose -f `echo $1` up
-echo "\nExperiment DONE !"
+docker stack deploy -c `echo $1` experiment

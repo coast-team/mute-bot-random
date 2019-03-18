@@ -24,6 +24,9 @@ conf.bots.forEach(obj => {
     "      - type: bind\n" +
     "        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}\n" +
     "        target: /home/node/app/output\n" +
+    "    deploy:\n" +
+    "      restart_policy:\n" +
+    "        condition: none\n" +
     "    command:\n" +
     "      - bash\n" +
     "      - -c\n" +
