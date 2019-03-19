@@ -21,13 +21,13 @@ then
   docker build -t botrandom ./mute-bot-random/
 fi
 
-name=`date +'%s'`
-mkdir "./Results/$name"
-
-export BOTRANDOM_EXPERIMENT_NAME=$name
 
 
 for i in `seq 1 $2`
 do
+  name=`date +'%s'`
+  mkdir "./Results/$name"
+  export BOTRANDOM_EXPERIMENT_NAME=$name
+
   docker stack deploy -c `echo $1` `echo "experiment$i"`
 done
