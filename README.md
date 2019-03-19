@@ -10,9 +10,17 @@ In order to simulate a collaboration, a bot has been developed. It plays randoml
 
 ## How to start an experiment
 
-Requirements : you need to install **docker** and **docker-compose** before using this script
+Requirements : you need to install **docker** before using this script
 
-You can start an experiment with the start.sh script : `./start.sh ./path/docker-compose-file`
+You can start an experiment with the start.sh script : `./start.sh ./path/docker-compose-file [number_of_experiment_simultaneous]`
+
+Or by using docker stack directly :
+
+```
+mkdir './Results/myName'
+export BOTRANDOM_EXPERIMENT_NAME=myName
+docker stack deploy -c 'compose_file' experiment_stack_name
+```
 
 ---
 
