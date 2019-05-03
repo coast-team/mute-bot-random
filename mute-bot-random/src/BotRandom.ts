@@ -10,8 +10,10 @@ import {
   TextInsert,
 } from '@coast-team/mute-core'
 import { KeyState, Symmetric } from '@coast-team/mute-crypto'
+import { EditableOpAvlList, SimpleDotPos } from 'dotted-logootsplit'
+import { OpEditableReplicatedList } from 'dotted-logootsplit/dist/types/core/op-replicated-list'
 import { appendFile, appendFileSync, writeFileSync } from 'fs'
-import { Stats } from 'mute-structs'
+import { LogootSRopes, Stats } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
 import { map } from 'rxjs/operators'
@@ -33,7 +35,7 @@ export class BotRandom {
   private botname: string
   private snapshot: number
   private cptOperation: number
-  private strategy: Strategy = Strategy.LOGOOTSPLIT
+  private strategy: Strategy = Strategy.DOTTEDLOGOOTSPLIT
 
   private start: boolean
   private messageSubject: Subject<{ streamId: number; content: Uint8Array; senderId: number }>
@@ -61,7 +63,7 @@ export class BotRandom {
     this.mutecore.memberJoin$ = this.network.memberJoin$
     this.mutecore.memberLeave$ = this.network.memberLeave$
 
-    console.log(`${this.botname} - State : `, this.mutecore.state.sequenceCRDT.str)
+    console.log(`${this.botname} - State : `, this.str)
     console.log(`${this.botname} - Network : ${this.network.id}`)
   }
 
@@ -78,7 +80,7 @@ export class BotRandom {
     while (cpt < nboperation) {
       const dep = this.random(99) < pDeplacement
       if (dep || this.index === -1) {
-        this.index = this.random(this.mutecore.state.sequenceCRDT.str.length)
+        this.index = this.random(this.str.length)
         console.log('---')
         stats.deplacement++
       }
@@ -100,10 +102,10 @@ export class BotRandom {
       await this.wait(time)
       cpt++
     }
-    stats.str = this.mutecore.state.sequenceCRDT.str.length
+    stats.str = this.str.length
     this.index = -1
     console.log('Stats : ', stats)
-    console.log('Final str : ', this.mutecore.state.sequenceCRDT.str)
+    console.log('Final str : ', this.str)
   }
 
   public wait(milisecond: number) {
@@ -141,10 +143,16 @@ export class BotRandom {
   }
 
   public async terminate() {
+    let stats = ''
+    if (this.mutecore.state.sequenceCRDT instanceof LogootSRopes) {
+      stats = new Stats(this.mutecore.state.sequenceCRDT).toString()
+    } else if (this.mutecore.state.sequenceCRDT instanceof EditableOpAvlList) {
+      stats = 'Not Implemented yet'
+    }
     const data = {
       vector: Array.from(this.mutecore.state.vector),
       sequenceCRDT: this.mutecore.state.sequenceCRDT,
-      stats: new Stats(this.mutecore.state.sequenceCRDT).toString(),
+      stats,
     }
     console.log(data.stats)
     await appendFileSync('./output/Logs.' + this.botname + '.json', ']')
@@ -258,7 +266,7 @@ export class BotRandom {
     )
 
     mutecore.experimentLogs$.subscribe((value) => {
-      // console.log(value)
+      console.log(value.operation)
       let prefix = ',' + os.EOL
       if (this.start) {
         prefix = '['
@@ -300,8 +308,18 @@ export class BotRandom {
     this.messageSubject.complete()
   }
 
-  get str() {
-    return this.mutecore.state.sequenceCRDT.str
+  get str(): string {
+    switch (this.strategy) {
+      case Strategy.LOGOOTSPLIT:
+        return (this.mutecore.state.sequenceCRDT as LogootSRopes).str
+      case Strategy.DOTTEDLOGOOTSPLIT:
+        return (this.mutecore.state.sequenceCRDT as OpEditableReplicatedList<
+          SimpleDotPos,
+          string
+        >).concatenated('')
+      default:
+        return ''
+    }
   }
 
   private random(max: number) {
