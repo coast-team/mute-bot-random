@@ -44,7 +44,14 @@ export class BotRandom {
 
   private index: number
 
-  constructor(botname: string, master: string, port: number, adr: string, snapshot: number) {
+  constructor(
+    botname: string,
+    master: string,
+    port: number,
+    adr: string,
+    snapshot: number,
+    strategy: Strategy
+  ) {
     this.messageSubject = new Subject()
     this.docChanges = new Subject()
     this.synchronize = () => {}
@@ -54,6 +61,7 @@ export class BotRandom {
 
     this.botname = botname
     this.snapshot = snapshot
+    this.strategy = strategy
     this.cptOperation = 0
     this.crypto = new Symmetric()
     this.mutecore = this.initMuteCore()

@@ -1,13 +1,14 @@
 {
-  "objective": 50000,
+  "objective": 500,
   "delay": 10000,
   "snapshot": 5000,
+  "strategy": "ls",
   "bots": [
     {
       "master": true,
       "botname": "Master",
       "time": 500,
-      "operation": 10000,
+      "operation": 100,
       "deletion": 20,
       "move": 5
     },
@@ -15,7 +16,7 @@
       "master": false,
       "botname": "Bot0",
       "time": 500,
-      "operation": 10000,
+      "operation": 100,
       "deletion": 20,
       "move": 5
     },
@@ -23,7 +24,7 @@
       "master": false,
       "botname": "Bot1",
       "time": 500,
-      "operation": 10000,
+      "operation": 100,
       "deletion": 20,
       "move": 5
     },
@@ -31,7 +32,7 @@
       "master": false,
       "botname": "Bot2",
       "time": 500,
-      "operation": 10000,
+      "operation": 100,
       "deletion": 20,
       "move": 5
     },
@@ -39,7 +40,7 @@
       "master": false,
       "botname": "Bot3",
       "time": 500,
-      "operation": 10000,
+      "operation": 100,
       "deletion": 20,
       "move": 5
     }

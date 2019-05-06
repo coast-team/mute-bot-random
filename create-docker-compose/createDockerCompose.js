@@ -43,6 +43,7 @@ conf.bots.forEach(obj => {
     ` --deletion ${obj.deletion}` +
     ` --deplacement ${obj.move}` +
     ` --operation ${obj.operation}` +
+    ` --strategy ${conf.strategy}` +
     "\n";
 });
 

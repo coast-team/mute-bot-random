@@ -1,0 +1,85 @@
+version: '3.2'
+services: 
+  master:
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Master --address master -p 20001 -o 500 --delay 10000 --time 500 -s 5000 --deletion 20 --deplacement 5 --operation 100 --strategy ls
+  bot1:
+    depends_on:
+      - master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot0 -m ws://master:20001 --address bot1 -p 20001 -o 500 --delay 10000 --time 500 -s 5000 --deletion 20 --deplacement 5 --operation 100 --strategy ls
+  bot2:
+    depends_on:
+      - master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot1 -m ws://master:20001 --address bot2 -p 20001 -o 500 --delay 10000 --time 500 -s 5000 --deletion 20 --deplacement 5 --operation 100 --strategy ls
+  bot3:
+    depends_on:
+      - master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot2 -m ws://master:20001 --address bot3 -p 20001 -o 500 --delay 10000 --time 500 -s 5000 --deletion 20 --deplacement 5 --operation 100 --strategy ls
+  bot4:
+    depends_on:
+      - master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot3 -m ws://master:20001 --address bot4 -p 20001 -o 500 --delay 10000 --time 500 -s 5000 --deletion 20 --deplacement 5 --operation 100 --strategy ls

@@ -1,3 +1,4 @@
+import { Strategy } from '@coast-team/mute-core'
 import * as program from 'commander'
 import { BotRandom } from './BotRandom'
 
@@ -31,17 +32,28 @@ program
     'save a snapshot of the structure every [nbOperation] operations',
     10
   )
+  .option('--strategy [strat]', 'The strategy to use', 'ls')
   .parse(process.argv)
 
 console.log('Start : port', program.port, ' - master', program.master)
 // new NetworkNode(program.port, program.master, program.port)
+
+let strat = Strategy.LOGOOTSPLIT
+switch (program.strategy) {
+  case 'dls':
+    strat = Strategy.DOTTEDLOGOOTSPLIT
+    break
+  default:
+    break
+}
 
 const bot = new BotRandom(
   program.namebot,
   program.master,
   program.port,
   program.address,
-  program.snapshot
+  program.snapshot,
+  strat
 )
 
 setTimeout(() => {
