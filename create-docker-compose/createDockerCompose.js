@@ -4,15 +4,17 @@ var file = "version: '3.2'\nservices: \n";
 var conf = JSON.parse(fs.readFileSync("./config.json"));
 
 var cptBot = 1;
+var master = "";
 var commandArgs = "";
 
 conf.bots.forEach(obj => {
   if (obj.master) {
-    file += "  master:\n";
+    file += `  ${obj.botname}:\n`;
+    master = obj.botname;
     commandArgs = "--address master";
   } else {
-    file += "  bot" + cptBot + ":\n";
-    file += "    depends_on:\n" + "      - master\n";
+    file += `  ${obj.botname}:\n`;
+    file += "    depends_on:\n" + `      - ${master}\n`;
     commandArgs = "-m ws://master:20001 --address bot" + cptBot;
     cptBot++;
   }
