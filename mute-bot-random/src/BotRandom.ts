@@ -16,7 +16,7 @@ import { appendFile, appendFileSync, writeFileSync } from 'fs'
 import { LogootSRopes, Stats } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
-import { map } from 'rxjs/operators'
+import { bufferCount, map } from 'rxjs/operators'
 import { MessageType, NetworkNode } from './NetworkNode'
 import { Message } from './proto'
 
@@ -84,27 +84,31 @@ export class BotRandom {
     const stats = { insertion: 0, deletion: 0, deplacement: 0, str: 0 }
 
     let cpt = 0
-
+    console.log('START :')
     while (cpt < nboperation) {
       const dep = this.random(99) < pDeplacement
       if (dep || this.index === -1) {
         this.index = this.random(this.str.length)
-        console.log('---')
+        // console.log('---')
         stats.deplacement++
       }
 
       const del = this.random(99) < pDeletion && this.index > 0
       if (del) {
-        console.log(`Delete ${this.index - 1}`)
+        // console.log(`Delete ${this.index - 1}`)
         this.docChanges.next([{ index: this.index - 1, length: 1 }])
         this.index--
         stats.deletion++
       } else {
         const c = this.randomChar()
-        console.log(`Insert ${this.index} \t${c}`)
+        // console.log(`Insert ${this.index} \t${c}`)
         this.docChanges.next([{ index: this.index, text: c }])
         this.index++
         stats.insertion++
+      }
+
+      if (cpt % 100 === 0) {
+        console.log('Operations : ' + cpt + '/' + nboperation)
       }
 
       await this.wait(time)
@@ -112,8 +116,7 @@ export class BotRandom {
     }
     stats.str = this.str.length
     this.index = -1
-    console.log('Stats : ', stats)
-    console.log('Final str : ', this.str)
+    console.log('FINISH : Waiting for objective...')
   }
 
   public wait(milisecond: number) {
@@ -273,31 +276,36 @@ export class BotRandom {
       })
     )
 
-    mutecore.experimentLogs$.subscribe((value) => {
-      console.log(value.operation)
-      let prefix = ',' + os.EOL
-      if (this.start) {
-        prefix = '['
-        this.start = false
-      }
+    mutecore.experimentLogs$.pipe(bufferCount(10)).subscribe((values) => {
+      let str = ''
+      values.forEach((value) => {
+        // console.log(value.operation)
+        let prefix = ',' + os.EOL
+        if (this.start) {
+          prefix = '['
+          this.start = false
+        }
 
-      const { struct, ...logs } = value
+        const { struct, ...logs } = value
+        str += prefix + JSON.stringify(logs)
+
+        this.cptOperation++
+        if (this.cptOperation % this.snapshot === 0) {
+          writeFileSync(
+            './output/Snapshot.' + this.cptOperation + '.' + this.botname + '.json',
+            JSON.stringify(struct)
+          )
+        }
+      })
       appendFile(
         './output/Logs.' + this.botname + '.json',
-        prefix + JSON.stringify(logs),
+        str, // prefix + JSON.stringify(logs),
         (err) => {
           if (err) {
             throw err
           }
         }
       )
-      this.cptOperation++
-      if (this.cptOperation % this.snapshot === 0) {
-        writeFileSync(
-          './output/Snapshot.' + this.cptOperation + '.' + this.botname + '.json',
-          JSON.stringify(struct)
-        )
-      }
     })
 
     // Synchronization mechanism

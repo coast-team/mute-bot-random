@@ -62,7 +62,6 @@ setTimeout(() => {
 
 setInterval(() => {
   if (bot.checkObjective(program.objective)) {
-    console.log('FINISH')
     bot.terminate().then(() => {
       console.log('Exit')
       process.exit(0)
