@@ -37,6 +37,9 @@ export class BotRandom {
   private cptOperation: number
   private strategy: Strategy = Strategy.DOTTEDLOGOOTSPLIT
 
+  private buffer: number
+  private logsnumber: number
+
   private start: boolean
   private messageSubject: Subject<{ streamId: number; content: Uint8Array; senderId: number }>
   private crypto: Symmetric
@@ -50,7 +53,9 @@ export class BotRandom {
     port: number,
     adr: string,
     snapshot: number,
-    strategy: Strategy
+    strategy: Strategy,
+    buffer: number,
+    logsnumber: number
   ) {
     this.messageSubject = new Subject()
     this.docChanges = new Subject()
@@ -62,6 +67,8 @@ export class BotRandom {
     this.botname = botname
     this.snapshot = snapshot
     this.strategy = strategy
+    this.buffer = buffer
+    this.logsnumber = logsnumber
     this.cptOperation = 0
     this.crypto = new Symmetric()
     this.mutecore = this.initMuteCore()
@@ -107,7 +114,7 @@ export class BotRandom {
         stats.insertion++
       }
 
-      if (cpt % 100 === 0) {
+      if (cpt % this.logsnumber === 0) {
         console.log('Operations : ' + cpt + '/' + nboperation)
       }
 
@@ -276,7 +283,7 @@ export class BotRandom {
       })
     )
 
-    mutecore.experimentLogs$.pipe(bufferCount(10)).subscribe((values) => {
+    mutecore.experimentLogs$.pipe(bufferCount(this.buffer)).subscribe((values) => {
       let str = ''
       values.forEach((value) => {
         // console.log(value.operation)

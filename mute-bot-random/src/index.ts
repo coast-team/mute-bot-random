@@ -27,6 +27,8 @@ program
   .option('--time [ms]', 'The time between each operations', 1000)
   .option('--delay [ms]', 'The time before starting', 5000)
   .option('--address [adr]', 'the adress of the node for exemple ws://[adr]:20001', 'localhost')
+  .option('--buffer [nb]', 'write logs in file every nb operations', 10)
+  .option('--logsnumber [nb]', 'logs every nb operation in the console', 100)
   .option(
     '-s, --snapshot [nbOperation]',
     'save a snapshot of the structure every [nbOperation] operations',
@@ -53,7 +55,9 @@ const bot = new BotRandom(
   program.port,
   program.address,
   program.snapshot,
-  strat
+  strat,
+  program.buffer,
+  program.logsnumber
 )
 
 setTimeout(() => {
