@@ -39,6 +39,7 @@ export class BotRandom {
 
   private buffer: number
   private logsnumber: number
+  private nbLocal: number
 
   private start: boolean
   private messageSubject: Subject<{ streamId: number; content: Uint8Array; senderId: number }>
@@ -70,6 +71,7 @@ export class BotRandom {
     this.buffer = buffer
     this.logsnumber = logsnumber
     this.cptOperation = 0
+    this.nbLocal = 0
     this.crypto = new Symmetric()
     this.mutecore = this.initMuteCore()
     this.network = this.initNetwork(this.mutecore.myMuteCoreId, master, port, adr)
@@ -90,9 +92,9 @@ export class BotRandom {
   ) {
     const stats = { insertion: 0, deletion: 0, deplacement: 0, str: 0 }
 
-    let cpt = 0
+    this.nbLocal = 0
     console.log('START :')
-    while (cpt < nboperation) {
+    while (this.nbLocal < nboperation) {
       const dep = this.random(99) < pDeplacement
       if (dep || this.index === -1) {
         this.index = this.random(this.str.length)
@@ -114,12 +116,8 @@ export class BotRandom {
         stats.insertion++
       }
 
-      if (cpt % this.logsnumber === 0) {
-        console.log('Operations : ' + cpt + '/' + nboperation)
-      }
-
       await this.wait(time)
-      cpt++
+      this.nbLocal++
     }
     stats.str = this.str.length
     this.index = -1
@@ -295,7 +293,9 @@ export class BotRandom {
 
         const { struct, ...logs } = value
         str += prefix + JSON.stringify(logs)
-
+        if (this.cptOperation % this.logsnumber === 0) {
+          console.log('Operation integrated : ' + this.cptOperation + `\t(${this.nbLocal})`)
+        }
         this.cptOperation++
         if (this.cptOperation % this.snapshot === 0) {
           writeFileSync(
