@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/bot-random.js",
+    "start": "node --max-old-space-size=8192 dist/bot-random.js",
     "dev": "nodemon --watch src -e js,ts --exec 'npm run build && chmod +x dist/bot-replay.js && node dist/bot-replay.js --cors --logLevel trace | bunyan'",
     "build": "webpack",
     "lint": "tslint --fix -p tsconfig.json 'src/**/*.ts' -e 'src/**/*.proto' -e 'src/**/*.d.ts' && prettier --write --list-different 'src/**/*.ts' './*.{ts,js,json,md}'  && markdownlint ./*.md -i 'CHANGELOG.md'",

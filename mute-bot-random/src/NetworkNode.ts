@@ -49,6 +49,8 @@ export class NetworkNode {
   private peerList: INetworkNodeInfo[]
   private server: WebSocket.Server
 
+  private tryCount: Map<string, number>
+
   private output: Subject<{ sender: number; message: any }>
   private memberJoin: Subject<number>
   private memberLeave: Subject<number>
@@ -59,6 +61,8 @@ export class NetworkNode {
     this.output = new Subject()
     this.memberJoin = new Subject()
     this.memberLeave = new Subject()
+
+    this.tryCount = new Map()
 
     this.masterUrl = masterUrl
     this.myUrl = 'ws://' + adr + ':' + port
@@ -82,6 +86,25 @@ export class NetworkNode {
   // --------------------------------------------------------------------------------------
   public connect(url: string): WebSocket {
     const ws = new WebSocket(url)
+
+    if (!this.tryCount.has(url)) {
+      this.tryCount.set(url, 3)
+    }
+
+    ws.onerror = () => {
+      let nb = this.tryCount.get(url) || 0
+      if (nb > 0) {
+        console.log('[ERROR] Failed to connect to ' + url + ` (${3 - nb + 1}/3)`)
+        nb--
+        this.tryCount.set(url, nb)
+        setTimeout(() => {
+          this.connect(url)
+        }, 5000)
+      } else {
+        console.log('[ERROR] Failed to connect to ' + url + ' 3 times...')
+        process.exit(1)
+      }
+    }
 
     ws.onopen = () => {
       this.send(ws, {
@@ -179,9 +202,11 @@ export class NetworkNode {
   }
 
   private addPeer(info: INetworkNodeInfo) {
-    this.peerList.push(info)
-    this.memberJoin.next(info.id)
-    console.log('Peer JOIN : ', this.peerListToString())
+    if (!this.hasPeer(info.url)) {
+      this.peerList.push(info)
+      this.memberJoin.next(info.id)
+      console.log('Peer JOIN : ', this.peerListToString())
+    }
   }
 
   private removePeer(url: string) {
