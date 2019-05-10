@@ -35,6 +35,8 @@ export class BotRandom {
   private botname: string
   private snapshot: number
   private cptOperation: number
+  private cptLocal: number
+  private cptRemote: number
   private strategy: Strategy = Strategy.DOTTEDLOGOOTSPLIT
 
   private buffer: number
@@ -71,6 +73,8 @@ export class BotRandom {
     this.buffer = buffer
     this.logsnumber = logsnumber
     this.cptOperation = 0
+    this.cptLocal = 0
+    this.cptRemote = 0
     this.nbLocal = 0
     this.crypto = new Symmetric()
     this.mutecore = this.initMuteCore()
@@ -293,10 +297,21 @@ export class BotRandom {
 
         const { struct, ...logs } = value
         str += prefix + JSON.stringify(logs)
-        if (this.cptOperation % this.logsnumber === 0) {
-          console.log('Operation integrated : ' + this.cptOperation + `\t(${this.nbLocal})`)
-        }
+
         this.cptOperation++
+        if (value.type === 'local') {
+          this.cptLocal++
+        } else {
+          this.cptRemote++
+        }
+
+        if (this.cptOperation % this.logsnumber === 0) {
+          console.log(
+            'Operations : ' +
+              this.cptOperation +
+              `\t(local: ${this.cptLocal}, remote : ${this.cptRemote})`
+          )
+        }
         if (this.cptOperation % this.snapshot === 0) {
           writeFileSync(
             './output/Snapshot.' + this.cptOperation + '.' + this.botname + '.json',
