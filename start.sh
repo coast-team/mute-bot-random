@@ -28,6 +28,8 @@ do
   name=`date +'%s'`
   mkdir "./Results/$name"
   export BOTRANDOM_EXPERIMENT_NAME=$name
+  chmod a+w "./Results/$name"
+
 
   docker stack deploy -c `echo $1` `echo "experiment$i"`
 done
