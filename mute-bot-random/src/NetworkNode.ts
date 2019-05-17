@@ -88,20 +88,20 @@ export class NetworkNode {
     const ws = new WebSocket(url)
 
     if (!this.tryCount.has(url)) {
-      this.tryCount.set(url, 3)
+      this.tryCount.set(url, 6)
     }
 
     ws.onerror = () => {
       let nb = this.tryCount.get(url) || 0
       if (nb > 0) {
-        console.log('[ERROR] Failed to connect to ' + url + ` (${3 - nb + 1}/3)`)
+        console.log('[ERROR] Failed to connect to ' + url + ` (${6 - nb + 1}/6)`)
         nb--
         this.tryCount.set(url, nb)
         setTimeout(() => {
           this.connect(url)
-        }, 5000)
+        }, 10000)
       } else {
-        console.log('[ERROR] Failed to connect to ' + url + ' 3 times...')
+        console.log('[ERROR] Failed to connect to ' + url + ' 6 times...')
         process.exit(1)
       }
     }
