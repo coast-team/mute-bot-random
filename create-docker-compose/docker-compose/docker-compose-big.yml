@@ -1,0 +1,170 @@
+version: '3.2'
+services: 
+  Master:
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Master --address master -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
+  Bot1:
+    depends_on:
+      - Master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot1 -m ws://master:20001 --address bot1 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
+  Bot2:
+    depends_on:
+      - Master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot2 -m ws://master:20001 --address bot2 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
+  Bot3:
+    depends_on:
+      - Master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot3 -m ws://master:20001 --address bot3 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
+  Bot4:
+    depends_on:
+      - Master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot4 -m ws://master:20001 --address bot4 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
+  Bot5:
+    depends_on:
+      - Master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot5 -m ws://master:20001 --address bot5 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
+  Bot6:
+    depends_on:
+      - Master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot6 -m ws://master:20001 --address bot6 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
+  Bot7:
+    depends_on:
+      - Master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot7 -m ws://master:20001 --address bot7 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
+  Bot8:
+    depends_on:
+      - Master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot8 -m ws://master:20001 --address bot8 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
+  Bot9:
+    depends_on:
+      - Master
+    image: botrandom:latest
+    user: "node"
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot9 -m ws://master:20001 --address bot9 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls

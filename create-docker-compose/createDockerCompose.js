@@ -11,11 +11,11 @@ conf.bots.forEach(obj => {
   if (obj.master) {
     file += `  ${obj.botname}:\n`;
     master = obj.botname;
-    commandArgs = "--address master";
+    commandArgs = "--address " + obj.botname;
   } else {
     file += `  ${obj.botname}:\n`;
     file += "    depends_on:\n" + `      - ${master}\n`;
-    commandArgs = "-m ws://master:20001 --address bot" + cptBot;
+    commandArgs = "-m ws://master:20001 --address " + obj.botname;
     cptBot++;
   }
 

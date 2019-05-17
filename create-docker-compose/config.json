@@ -1,22 +1,14 @@
 {
-  "objective": 500,
+  "objective": 2000000,
   "delay": 10000,
-  "snapshot": 5000,
+  "snapshot": 50000,
   "strategy": "ls",
   "bots": [
     {
       "master": true,
       "botname": "Master",
       "time": 500,
-      "operation": 100,
-      "deletion": 20,
-      "move": 5
-    },
-    {
-      "master": false,
-      "botname": "Bot0",
-      "time": 500,
-      "operation": 100,
+      "operation": 200000,
       "deletion": 20,
       "move": 5
     },
@@ -24,7 +16,7 @@
       "master": false,
       "botname": "Bot1",
       "time": 500,
-      "operation": 100,
+      "operation": 200000,
       "deletion": 20,
       "move": 5
     },
@@ -32,7 +24,7 @@
       "master": false,
       "botname": "Bot2",
       "time": 500,
-      "operation": 100,
+      "operation": 200000,
       "deletion": 20,
       "move": 5
     },
@@ -40,7 +32,55 @@
       "master": false,
       "botname": "Bot3",
       "time": 500,
-      "operation": 100,
+      "operation": 200000,
+      "deletion": 20,
+      "move": 5
+    },
+    {
+      "master": false,
+      "botname": "Bot4",
+      "time": 500,
+      "operation": 200000,
+      "deletion": 20,
+      "move": 5
+    },
+    {
+      "master": false,
+      "botname": "Bot5",
+      "time": 500,
+      "operation": 200000,
+      "deletion": 20,
+      "move": 5
+    },
+    {
+      "master": false,
+      "botname": "Bot6",
+      "time": 500,
+      "operation": 200000,
+      "deletion": 20,
+      "move": 5
+    },
+    {
+      "master": false,
+      "botname": "Bot7",
+      "time": 500,
+      "operation": 200000,
+      "deletion": 20,
+      "move": 5
+    },
+    {
+      "master": false,
+      "botname": "Bot8",
+      "time": 500,
+      "operation": 200000,
+      "deletion": 20,
+      "move": 5
+    },
+    {
+      "master": false,
+      "botname": "Bot9",
+      "time": 500,
+      "operation": 200000,
       "deletion": 20,
       "move": 5
     }
