@@ -151,18 +151,13 @@ export class BotRandom {
 
   public checkObjective(nboperation: number) {
     if (nboperation > 0) {
-      const vector = this.mutecore.state.vector
-      let currentOperationNumber = 0
-      vector.forEach((value) => {
-        currentOperationNumber += value + 1
-      })
-      return currentOperationNumber >= nboperation
+      return this.cptOperation >= nboperation
     } else {
       throw new Error('checkObjective : the request number of operation to check is invalid')
     }
   }
 
-  public async terminate() {
+  public terminate() {
     let stats = ''
     if (this.mutecore.state.sequenceCRDT instanceof LogootSRopes) {
       stats = new Stats(this.mutecore.state.sequenceCRDT).toString()
@@ -175,7 +170,7 @@ export class BotRandom {
       stats,
     }
     console.log(data.stats)
-    await appendFileSync('./output/Logs.' + this.botname + '.json', ']')
+    appendFileSync('./output/Logs.' + this.botname + '.json', ']')
     /* await writeFileSync(
       './Results.' + this.botname + ':' + this.network.id + '.json',
       JSON.stringify(data)
@@ -319,14 +314,9 @@ export class BotRandom {
           )
         }
       })
-      appendFile(
+      appendFileSync(
         './output/Logs.' + this.botname + '.json',
-        str, // prefix + JSON.stringify(logs),
-        (err) => {
-          if (err) {
-            throw err
-          }
-        }
+        str // prefix + JSON.stringify(logs),
       )
     })
 
