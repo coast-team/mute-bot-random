@@ -45,6 +45,9 @@ switch (program.strategy) {
   case 'dls':
     strat = Strategy.DOTTEDLOGOOTSPLIT
     break
+  case 'fifodls':
+    strat = Strategy.FIFODOTTEDLOGOOTSPLIT
+    break
   default:
     break
 }

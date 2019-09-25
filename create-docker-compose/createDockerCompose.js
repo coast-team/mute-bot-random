@@ -13,9 +13,9 @@ conf.bots.forEach(obj => {
     master = obj.botname;
     commandArgs = "--address " + obj.botname;
   } else {
-    file += `  ${obj.botname}:\n`;
+    file += `  ${obj.botname.toLowerCase()}:\n`;
     file += "    depends_on:\n" + `      - ${master}\n`;
-    commandArgs = "-m ws://master:20001 --address " + obj.botname;
+    commandArgs = "-m ws://master:20001 --address " + obj.botname.toLowerCase();
     cptBot++;
   }
 
@@ -46,7 +46,7 @@ conf.bots.forEach(obj => {
     ` --deplacement ${obj.move}` +
     ` --operation ${obj.operation}` +
     ` --strategy ${conf.strategy}` +
-    "\n";
+    " && sync \n";
 });
 
 fs.writeFileSync(

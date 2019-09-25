@@ -173,6 +173,9 @@ export interface IMessage {
     /** Message streamId */
     streamId?: (number|null);
 
+    /** Message subtype */
+    subtype?: (number|null);
+
     /** Message content */
     content?: (Uint8Array|null);
 }
@@ -188,6 +191,9 @@ export class Message implements IMessage {
 
     /** Message streamId. */
     public streamId: number;
+
+    /** Message subtype. */
+    public subtype: number;
 
     /** Message content. */
     public content: Uint8Array;

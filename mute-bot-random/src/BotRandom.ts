@@ -5,6 +5,7 @@ import {
   MuteCoreTypes,
   StateStrategy,
   Strategy,
+  StreamId,
   Streams as MuteCoreStreams,
   TextDelete,
   TextInsert,
@@ -12,7 +13,7 @@ import {
 import { KeyState, Symmetric } from '@coast-team/mute-crypto'
 import { EditableOpAvlList, SimpleDotPos } from 'dotted-logootsplit'
 import { OpEditableReplicatedList } from 'dotted-logootsplit/dist/types/core/op-replicated-list'
-import { appendFile, appendFileSync, writeFileSync } from 'fs'
+import { appendFileSync, writeFileSync } from 'fs'
 import { LogootSRopes, Stats } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
@@ -44,7 +45,7 @@ export class BotRandom {
   private nbLocal: number
 
   private start: boolean
-  private messageSubject: Subject<{ streamId: number; content: Uint8Array; senderId: number }>
+  private messageSubject: Subject<{ streamId: StreamId; content: Uint8Array; senderId: number }>
   private crypto: Symmetric
   private docChanges: Subject<IDocContentOperation[]>
 
@@ -187,7 +188,7 @@ export class BotRandom {
       if (decode) {
         // console.log('receive', decode.streamId)
         this.messageSubject.next({
-          streamId: decode.streamId,
+          streamId: { type: decode.streamId, subtype: decode.subtype },
           content: decode.content,
           senderId: out.sender,
         })
@@ -225,6 +226,9 @@ export class BotRandom {
         share: false,
         vector: new Map<number, number>(),
       },
+      metaPulsar: {
+        activatePulsar: false,
+      },
     })
 
     // Metadata
@@ -242,17 +246,17 @@ export class BotRandom {
     mutecore.messageIn$ = this.messageSubject.asObservable()
     mutecore.messageOut$.subscribe(({ streamId, content, recipientId }) => {
       if (
-        streamId === MuteCoreStreams.DOCUMENT_CONTENT &&
+        streamId.type === MuteCoreStreams.DOCUMENT_CONTENT &&
         this.crypto &&
         this.crypto.state === KeyState.READY
       ) {
         console.log('OUT', recipientId)
         this.crypto
           .encrypt(content)
-          .then((encryptedContent) => this.send(streamId, encryptedContent, recipientId))
+          .then((encryptedContent) => this.send(streamId.type, encryptedContent, recipientId))
           .catch((err) => console.error('Failed to encrypt a message: ', err))
       } else {
-        this.send(streamId, content, recipientId)
+        this.send(streamId.type, content, recipientId)
       }
     })
 
