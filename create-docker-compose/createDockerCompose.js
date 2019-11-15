@@ -9,9 +9,9 @@ var commandArgs = "";
 
 conf.bots.forEach(obj => {
   if (obj.master) {
-    file += `  ${obj.botname}:\n`;
+    file += `  ${obj.botname.toLowerCase()}:\n`;
     master = obj.botname;
-    commandArgs = "--address " + obj.botname;
+    commandArgs = "--address " + obj.botname.toLowerCase();
   } else {
     file += `  ${obj.botname.toLowerCase()}:\n`;
     file += "    depends_on:\n" + `      - ${master}\n`;

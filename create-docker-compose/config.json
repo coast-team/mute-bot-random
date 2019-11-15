@@ -1,86 +1,86 @@
 {
-  "objective": 1000000,
+  "objective": 500000,
   "delay": 10000,
   "snapshot": 50000,
-  "strategy": "dls",
+  "strategy": "ls",
   "bots": [
     {
       "master": true,
       "botname": "Master",
-      "time": 500,
-      "operation": 100000,
+      "time": 200,
+      "operation": 50000,
       "deletion": 20,
       "move": 5
     },
     {
       "master": false,
       "botname": "Bot1",
-      "time": 500,
-      "operation": 100000,
+      "time": 200,
+      "operation": 50000,
       "deletion": 20,
       "move": 5
     },
     {
       "master": false,
       "botname": "Bot2",
-      "time": 500,
-      "operation": 100000,
+      "time": 200,
+      "operation": 50000,
       "deletion": 20,
       "move": 5
     },
     {
       "master": false,
       "botname": "Bot3",
-      "time": 500,
-      "operation": 100000,
+      "time": 200,
+      "operation": 50000,
       "deletion": 20,
       "move": 5
     },
     {
       "master": false,
       "botname": "Bot4",
-      "time": 500,
-      "operation": 100000,
+      "time": 200,
+      "operation": 50000,
       "deletion": 20,
       "move": 5
     },
     {
       "master": false,
       "botname": "Bot5",
-      "time": 500,
-      "operation": 100000,
+      "time": 200,
+      "operation": 50000,
       "deletion": 20,
       "move": 5
     },
     {
       "master": false,
       "botname": "Bot6",
-      "time": 500,
-      "operation": 100000,
+      "time": 200,
+      "operation": 50000,
       "deletion": 20,
       "move": 5
     },
     {
       "master": false,
       "botname": "Bot7",
-      "time": 500,
-      "operation": 100000,
+      "time": 200,
+      "operation": 50000,
       "deletion": 20,
       "move": 5
     },
     {
       "master": false,
       "botname": "Bot8",
-      "time": 500,
-      "operation": 100000,
+      "time": 200,
+      "operation": 50000,
       "deletion": 20,
       "move": 5
     },
     {
       "master": false,
       "botname": "Bot9",
-      "time": 500,
-      "operation": 100000,
+      "time": 200,
+      "operation": 50000,
       "deletion": 20,
       "move": 5
     }

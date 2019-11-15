@@ -1,6 +1,6 @@
-version: "3.2"
-services:
-  Master:
+version: '3.2'
+services: 
+  master:
     image: botrandom:latest
     user: "node"
     volumes:
@@ -14,8 +14,8 @@ services:
       - bash
       - -c
       - |
-        npm start -- -n Master --address master -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
-  Bot1:
+        npm start -- -n Master --address master -p 20001 -o 10000 --delay 10000 --time 500 -s 500 --deletion 20 --deplacement 5 --operation 1000 --strategy dls
+  bot1:
     depends_on:
       - Master
     image: botrandom:latest
@@ -31,8 +31,8 @@ services:
       - bash
       - -c
       - |
-        npm start -- -n Bot1 -m ws://master:20001 --address bot1 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
-  Bot2:
+        npm start -- -n Bot1 -m ws://master:20001 --address bot1 -p 20001 -o 10000 --delay 10000 --time 500 -s 500 --deletion 20 --deplacement 5 --operation 1000 --strategy dls
+  bot2:
     depends_on:
       - Master
     image: botrandom:latest
@@ -48,8 +48,8 @@ services:
       - bash
       - -c
       - |
-        npm start -- -n Bot2 -m ws://master:20001 --address bot2 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
-  Bot3:
+        npm start -- -n Bot2 -m ws://master:20001 --address bot2 -p 20001 -o 10000 --delay 10000 --time 500 -s 500 --deletion 20 --deplacement 5 --operation 1000 --strategy dls
+  bot3:
     depends_on:
       - Master
     image: botrandom:latest
@@ -65,8 +65,8 @@ services:
       - bash
       - -c
       - |
-        npm start -- -n Bot3 -m ws://master:20001 --address bot3 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
-  Bot4:
+        npm start -- -n Bot3 -m ws://master:20001 --address bot3 -p 20001 -o 10000 --delay 10000 --time 500 -s 500 --deletion 20 --deplacement 5 --operation 1000 --strategy dls
+  bot4:
     depends_on:
       - Master
     image: botrandom:latest
@@ -82,8 +82,8 @@ services:
       - bash
       - -c
       - |
-        npm start -- -n Bot4 -m ws://master:20001 --address bot4 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
-  Bot5:
+        npm start -- -n Bot4 -m ws://master:20001 --address bot4 -p 20001 -o 10000 --delay 10000 --time 500 -s 500 --deletion 20 --deplacement 5 --operation 1000 --strategy dls
+  bot5:
     depends_on:
       - Master
     image: botrandom:latest
@@ -99,8 +99,8 @@ services:
       - bash
       - -c
       - |
-        npm start -- -n Bot5 -m ws://master:20001 --address bot5 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
-  Bot6:
+        npm start -- -n Bot5 -m ws://master:20001 --address bot5 -p 20001 -o 10000 --delay 10000 --time 500 -s 500 --deletion 20 --deplacement 5 --operation 1000 --strategy dls
+  bot6:
     depends_on:
       - Master
     image: botrandom:latest
@@ -116,8 +116,8 @@ services:
       - bash
       - -c
       - |
-        npm start -- -n Bot6 -m ws://master:20001 --address bot6 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
-  Bot7:
+        npm start -- -n Bot6 -m ws://master:20001 --address bot6 -p 20001 -o 10000 --delay 10000 --time 500 -s 500 --deletion 20 --deplacement 5 --operation 1000 --strategy dls
+  bot7:
     depends_on:
       - Master
     image: botrandom:latest
@@ -133,8 +133,8 @@ services:
       - bash
       - -c
       - |
-        npm start -- -n Bot7 -m ws://master:20001 --address bot7 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
-  Bot8:
+        npm start -- -n Bot7 -m ws://master:20001 --address bot7 -p 20001 -o 10000 --delay 10000 --time 500 -s 500 --deletion 20 --deplacement 5 --operation 1000 --strategy dls
+  bot8:
     depends_on:
       - Master
     image: botrandom:latest
@@ -150,8 +150,8 @@ services:
       - bash
       - -c
       - |
-        npm start -- -n Bot8 -m ws://master:20001 --address bot8 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
-  Bot9:
+        npm start -- -n Bot8 -m ws://master:20001 --address bot8 -p 20001 -o 10000 --delay 10000 --time 500 -s 500 --deletion 20 --deplacement 5 --operation 1000 --strategy dls
+  bot9:
     depends_on:
       - Master
     image: botrandom:latest
@@ -167,4 +167,4 @@ services:
       - bash
       - -c
       - |
-        npm start -- -n Bot9 -m ws://master:20001 --address bot9 -p 20001 -o 2000000 --delay 10000 --time 500 -s 50000 --deletion 20 --deplacement 5 --operation 200000 --strategy ls
+        npm start -- -n Bot9 -m ws://master:20001 --address bot9 -p 20001 -o 10000 --delay 10000 --time 500 -s 500 --deletion 20 --deplacement 5 --operation 1000 --strategy dls
