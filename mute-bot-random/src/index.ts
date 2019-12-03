@@ -64,7 +64,12 @@ const bot = new BotRandom(
 )
 
 setTimeout(() => {
-  bot.doChanges(program.operation, program.time, program.deletion, program.deplacement)
+  bot.doChanges(
+    program.operation,
+    parseInt(program.time, 10),
+    program.deletion,
+    program.deplacement
+  )
 }, program.delay)
 
 setInterval(() => {

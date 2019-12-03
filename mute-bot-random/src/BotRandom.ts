@@ -97,17 +97,28 @@ export class BotRandom {
   ) {
     const stats = { insertion: 0, deletion: 0, deplacement: 0, str: 0 }
 
+    const currentpDeplacement = pDeplacement
+    let currentpDeletion = pDeletion
+
     this.nbLocal = 0
     console.log('START :')
+    let changeState = false
+
     while (this.nbLocal < nboperation) {
-      const dep = this.random(99) < pDeplacement
+      if (this.str.length >= 60000 && !changeState) {
+        console.log('Change rate : 50/50')
+        currentpDeletion = 50
+        changeState = true
+      }
+
+      const dep = this.random(99) < currentpDeplacement
       if (dep || this.index === -1) {
         this.index = this.random(this.str.length)
         // console.log('---')
         stats.deplacement++
       }
 
-      const del = this.random(99) < pDeletion && this.index > 0
+      const del = this.random(99) < currentpDeletion && this.index > 0
       if (del) {
         // console.log(`Delete ${this.index - 1}`)
         this.docChanges.next([{ index: this.index - 1, length: 1 }])
@@ -121,7 +132,9 @@ export class BotRandom {
         stats.insertion++
       }
 
-      await this.wait(time)
+      const randomTime = this.random(100) - 50
+      const newTime = parseInt(time + '', 10) + randomTime
+      await this.wait(newTime)
       this.nbLocal++
     }
     stats.str = this.str.length
