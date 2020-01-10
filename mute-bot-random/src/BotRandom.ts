@@ -14,7 +14,7 @@ import { KeyState, Symmetric } from '@coast-team/mute-crypto'
 import { EditableOpAvlList, SimpleDotPos } from 'dotted-logootsplit'
 import { OpEditableReplicatedList } from 'dotted-logootsplit/dist/types/core/op-replicated-list'
 import { appendFileSync, writeFileSync } from 'fs'
-import { LogootSRopes, Stats } from 'mute-structs'
+import { LogootSRopes, RenamableReplicableList, Stats } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
 import { bufferTime, map } from 'rxjs/operators'
@@ -38,7 +38,7 @@ export class BotRandom {
   private cptOperation: number
   private cptLocal: number
   private cptRemote: number
-  private strategy: Strategy = Strategy.DOTTEDLOGOOTSPLIT
+  private strategy: Strategy
 
   private buffer: number
   private logsnumber: number
@@ -331,6 +331,10 @@ export class BotRandom {
             JSON.stringify(struct)
           )
         }
+        if (this.botname === "Master" && this.strategy === Strategy.RENAMABLELOGOOTSPLIT && this.cptOperation % 30000 === 0) {
+          console.log("Trigger rename")
+          this.docChanges.next([])
+        }
       })
       appendFileSync(
         './output/Logs.' + this.botname + '.json',
@@ -358,6 +362,8 @@ export class BotRandom {
     switch (this.strategy) {
       case Strategy.LOGOOTSPLIT:
         return (this.mutecore.state.sequenceCRDT as LogootSRopes).str
+      case Strategy.RENAMABLELOGOOTSPLIT:
+        return (this.mutecore.state.sequenceCRDT as RenamableReplicableList).str
       case Strategy.DOTTEDLOGOOTSPLIT:
         return (this.mutecore.state.sequenceCRDT as OpEditableReplicatedList<
           SimpleDotPos,
