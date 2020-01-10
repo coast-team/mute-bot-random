@@ -17,7 +17,7 @@ import { appendFileSync, writeFileSync } from 'fs'
 import { LogootSRopes, Stats } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
-import { bufferCount, map } from 'rxjs/operators'
+import { bufferTime, map } from 'rxjs/operators'
 import { MessageType, NetworkNode } from './NetworkNode'
 import { Message } from './proto'
 
@@ -297,7 +297,7 @@ export class BotRandom {
       })
     )
 
-    mutecore.experimentLogs$.pipe(bufferCount(this.buffer)).subscribe((values) => {
+    mutecore.experimentLogs$.pipe(bufferTime(5000, undefined, this.buffer)).subscribe((values) => {
       let str = ''
       values.forEach((value) => {
         // console.log(value.operation)
