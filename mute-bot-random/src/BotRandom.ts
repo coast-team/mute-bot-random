@@ -185,6 +185,7 @@ export class BotRandom {
     }
     console.log(data.stats)
     appendFileSync('./output/Logs.' + this.botname + '.json', ']')
+    writeFileSync('./output/string.' + this.botname + '.txt', this.str)
     /* await writeFileSync(
       './Results.' + this.botname + ':' + this.network.id + '.json',
       JSON.stringify(data)
