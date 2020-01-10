@@ -14,7 +14,7 @@ conf.bots.forEach(obj => {
     commandArgs = "--address " + obj.botname.toLowerCase();
   } else {
     file += `  ${obj.botname.toLowerCase()}:\n`;
-    file += "    depends_on:\n" + `      - ${master}\n`;
+    file += "    depends_on:\n" + `      - ${master.toLowerCase()}\n`;
     commandArgs = "-m ws://master:20001 --address " + obj.botname.toLowerCase();
     cptBot++;
   }
