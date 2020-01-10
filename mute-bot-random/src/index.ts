@@ -72,10 +72,15 @@ setTimeout(() => {
   )
 }, program.delay)
 
-setInterval(() => {
+const interval = setInterval(() => {
   if (bot.checkObjective(program.objective)) {
+    clearInterval(interval)
     bot.terminate()
-    console.log('Exit')
-    process.exit(0)
+    // Wait for a while before exiting
+    // Allow to run the anti-entropy mechanism to help other nodes
+    setTimeout(() => {
+      console.log('Exit')
+      process.exit(0)
+    }, 60000)
   }
 }, 1000)
