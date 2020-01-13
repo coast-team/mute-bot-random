@@ -1,1 +1,5 @@
-/Results
+# Prevent snapshots to be added to the repository
+results/*/snapshots/**
+
+# Allow to add snapshots as ZIP archives
+!results/*/snapshots/*.zip
