@@ -1,9 +1,7 @@
 import {
   FixDataState,
   MetaDataType,
-  MuteCoreFactory,
   MuteCoreTypes,
-  StateStrategy,
   Strategy,
   StreamId,
   Streams as MuteCoreStreams,
@@ -18,6 +16,7 @@ import { LogootSRopes, RenamableReplicableList, Stats } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
 import { bufferTime, map } from 'rxjs/operators'
+import { delay, generateMuteCore, random, randomChar } from './helpers'
 import { MessageType, NetworkNode } from './NetworkNode'
 import { Message } from './proto'
 
@@ -28,9 +27,6 @@ export interface IDocContentOperation {
 }
 
 export class BotRandom {
-  public static AVATAR = 'https://www.shareicon.net/data/256x256/2015/11/26/184857_dice_256x256.png'
-
-  private synchronize: () => void
   private network: NetworkNode
   private mutecore: MuteCoreTypes
   private botname: string
@@ -42,7 +38,6 @@ export class BotRandom {
 
   private buffer: number
   private logsnumber: number
-  private nbLocal: number
 
   private start: boolean
   private messageSubject: Subject<{ streamId: StreamId; content: Uint8Array; senderId: number }>
@@ -63,7 +58,6 @@ export class BotRandom {
   ) {
     this.messageSubject = new Subject()
     this.docChanges = new Subject()
-    this.synchronize = () => {}
 
     this.start = true
     this.index = -1
@@ -76,10 +70,13 @@ export class BotRandom {
     this.cptOperation = 0
     this.cptLocal = 0
     this.cptRemote = 0
-    this.nbLocal = 0
     this.crypto = new Symmetric()
-    this.mutecore = this.initMuteCore()
-    this.network = this.initNetwork(this.mutecore.myMuteCoreId, master, port, adr)
+
+    this.mutecore = generateMuteCore(this.strategy, this.botname)
+    this.initMuteCore()
+
+    this.network = new NetworkNode(this.mutecore.myMuteCoreId, master, port, adr)
+    this.initNetwork()
 
     // Collaborators
     this.mutecore.memberJoin$ = this.network.memberJoin$
@@ -95,50 +92,41 @@ export class BotRandom {
     pDeletion: number,
     pDeplacement: number
   ) {
-    const stats = { insertion: 0, deletion: 0, deplacement: 0, str: 0 }
-
     const currentpDeplacement = pDeplacement
     let currentpDeletion = pDeletion
 
-    this.nbLocal = 0
     console.log('START :')
     let changeState = false
 
-    while (this.nbLocal < nboperation) {
+    for (let nbLocal = 0; nbLocal < nboperation; nbLocal++) {
       if (this.str.length >= 60000 && !changeState) {
         console.log('Change rate : 50/50')
         currentpDeletion = 50
         changeState = true
       }
 
-      const dep = this.random(99) < currentpDeplacement
+      const dep = random(99) < currentpDeplacement
       if (dep || this.index === -1) {
-        this.index = this.random(this.str.length)
+        this.index = random(this.str.length)
         // console.log('---')
-        stats.deplacement++
       }
 
-      const del = this.random(99) < currentpDeletion && this.index > 0
+      const del = random(99) < currentpDeletion && this.index > 0
       if (del) {
         // console.log(`Delete ${this.index - 1}`)
         this.docChanges.next([{ index: this.index - 1, length: 1 }])
         this.index--
-        stats.deletion++
       } else {
-        const c = this.randomChar()
+        const c = randomChar()
         // console.log(`Insert ${this.index} \t${c}`)
         this.docChanges.next([{ index: this.index, text: c }])
         this.index++
-        stats.insertion++
       }
 
-      const randomTime = this.random(100) - 50
-      const newTime = parseInt(time + '', 10) + randomTime
-      await this.wait(newTime)
-      this.nbLocal++
+      const randomTime = random(100) - 50
+      const newTime = time + randomTime
+      await delay(newTime)
     }
-    stats.str = this.str.length
-    this.index = -1
     console.log('FINISH : Waiting for objective...')
   }
 
@@ -194,10 +182,8 @@ export class BotRandom {
   }
 
   // INIT NETWORK
-  public initNetwork(id: number, master: string, port: number, adr: string) {
-    const network = new NetworkNode(id, master, port, adr)
-
-    network.output$.subscribe((out) => {
+  public initNetwork() {
+    this.network.output$.subscribe((out) => {
       const decode = Message.decode(out.message)
       if (decode) {
         // console.log('receive', decode.streamId)
@@ -208,45 +194,12 @@ export class BotRandom {
         })
       }
     })
-
-    return network
   }
 
   // INIT MUTECORE
-
   public initMuteCore() {
-    const state = StateStrategy.emptyState(this.strategy)
-    if (!state) {
-      throw new Error('state is null')
-    }
-
-    const mutecore = MuteCoreFactory.createMuteCore({
-      strategy: this.strategy,
-      profile: {
-        displayName: this.botname,
-        login: 'bot.random',
-        avatar: BotRandom.AVATAR,
-      },
-      docContent: state,
-      metaTitle: {
-        title: 'Untitled Document',
-        titleModified: 0,
-      },
-      metaFixData: {
-        docCreated: Date.now(),
-        cryptoKey: '',
-      },
-      metaLogs: {
-        share: false,
-        vector: new Map<number, number>(),
-      },
-      metaPulsar: {
-        activatePulsar: false,
-      },
-    })
-
     // Metadata
-    mutecore.remoteMetadataUpdate$.subscribe(({ type, data }) => {
+    this.mutecore.remoteMetadataUpdate$.subscribe(({ type, data }) => {
       // console.log(`${this.botname} - Metadata update type:${type}, data : `, data)
       if (type === MetaDataType.FixData) {
         const { cryptoKey } = data as FixDataState
@@ -257,8 +210,8 @@ export class BotRandom {
     })
 
     // I/O
-    mutecore.messageIn$ = this.messageSubject.asObservable()
-    mutecore.messageOut$.subscribe(({ streamId, content, recipientId }) => {
+    this.mutecore.messageIn$ = this.messageSubject.asObservable()
+    this.mutecore.messageOut$.subscribe(({ streamId, content, recipientId }) => {
       if (
         streamId.type === MuteCoreStreams.DOCUMENT_CONTENT &&
         this.crypto &&
@@ -274,7 +227,7 @@ export class BotRandom {
       }
     })
 
-    mutecore.remoteTextOperations$.subscribe(({ operations }) => {
+    this.mutecore.remoteTextOperations$.subscribe(({ operations }) => {
       operations.forEach((ope) => {
         if (ope instanceof TextInsert && ope.index < this.index) {
           this.index += ope.content.length
@@ -284,13 +237,13 @@ export class BotRandom {
       })
     })
 
-    mutecore.localTextOperations$ = this.docChanges.asObservable().pipe(
+    this.mutecore.localTextOperations$ = this.docChanges.asObservable().pipe(
       map((ops) => {
         return ops.map(({ index, text, length }) => {
           if (length) {
-            return new TextDelete(index, length, mutecore.myMuteCoreId)
+            return new TextDelete(index, length, this.mutecore.myMuteCoreId)
           } else if (text) {
-            return new TextInsert(index, text, mutecore.myMuteCoreId)
+            return new TextInsert(index, text, this.mutecore.myMuteCoreId)
           } else {
             throw new Error('Operation not recognize')
           }
@@ -298,64 +251,60 @@ export class BotRandom {
       })
     )
 
-    mutecore.experimentLogs$.pipe(bufferTime(5000, undefined, this.buffer)).subscribe((values) => {
-      let str = ''
-      values.forEach((value) => {
-        // console.log(value.operation)
-        let prefix = ',' + os.EOL
-        if (this.start) {
-          prefix = '['
-          this.start = false
-        }
+    this.mutecore.experimentLogs$
+      .pipe(bufferTime(5000, undefined, this.buffer))
+      .subscribe((values) => {
+        let str = ''
+        values.forEach((value) => {
+          // console.log(value.operation)
+          let prefix = ',' + os.EOL
+          if (this.start) {
+            prefix = '['
+            this.start = false
+          }
 
-        const { struct, ...logs } = value
-        str += prefix + JSON.stringify(logs)
+          const { struct, ...logs } = value
+          str += prefix + JSON.stringify(logs)
 
-        this.cptOperation++
-        if (value.type === 'local') {
-          this.cptLocal++
-        } else {
-          this.cptRemote++
-        }
+          this.cptOperation++
+          if (value.type === 'local') {
+            this.cptLocal++
+          } else {
+            this.cptRemote++
+          }
 
-        if (this.cptOperation % this.logsnumber === 0) {
-          console.log(
-            'Operations : ' +
-              this.cptOperation +
-              `\t(local: ${this.cptLocal}, remote : ${this.cptRemote})`
-          )
-        }
-        if (this.cptOperation % this.snapshot === 0) {
-          writeFileSync(
-            './output/Snapshot.' + this.cptOperation + '.' + this.botname + '.json',
-            JSON.stringify(struct)
-          )
-        }
-        if (this.botname === "Master" && this.strategy === Strategy.RENAMABLELOGOOTSPLIT && this.cptOperation % 30000 === 0) {
-          console.log("Trigger rename")
-          this.docChanges.next([])
-        }
+          if (this.cptOperation % this.logsnumber === 0) {
+            console.log(
+              'Operations : ' +
+                this.cptOperation +
+                `\t(local: ${this.cptLocal}, remote : ${this.cptRemote})`
+            )
+          }
+          if (this.cptOperation % this.snapshot === 0) {
+            writeFileSync(
+              './output/Snapshot.' + this.cptOperation + '.' + this.botname + '.json',
+              JSON.stringify(struct)
+            )
+          }
+          if (
+            this.botname === 'Master' &&
+            this.strategy === Strategy.RENAMABLELOGOOTSPLIT &&
+            this.cptOperation % 30000 === 0
+          ) {
+            console.log('Trigger rename')
+            this.docChanges.next([])
+          }
+        })
+        appendFileSync(
+          './output/Logs.' + this.botname + '.json',
+          str // prefix + JSON.stringify(logs),
+        )
       })
-      appendFileSync(
-        './output/Logs.' + this.botname + '.json',
-        str // prefix + JSON.stringify(logs),
-      )
-    })
 
-    // Synchronization mechanism
-    this.synchronize = () => {
-      mutecore.synchronize()
-    }
-    mutecore.collabJoin$.subscribe(() => {
+    this.mutecore.collabJoin$.subscribe(() => {
       console.log('New collaborator')
-      this.synchronize()
+      this.mutecore.synchronize()
     })
-
-    return mutecore
-  }
-
-  destroy() {
-    this.messageSubject.complete()
   }
 
   get str(): string {
@@ -372,14 +321,5 @@ export class BotRandom {
       default:
         return ''
     }
-  }
-
-  private random(max: number) {
-    return Math.floor(Math.random() * (max + 1))
-  }
-
-  private randomChar() {
-    const available = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ !:;.?'
-    return available.charAt(this.random(available.length - 1))
   }
 }
