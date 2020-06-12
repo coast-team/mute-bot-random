@@ -17,18 +17,26 @@ try {
 
 program
   .version(version)
-  .option('-m, --master [url]', 'Master Url')
-  .option('-p, --port [port]', 'The bot server port', 20001)
+  .option('-m, --master [url]', 'the URL of the master bot')
+  .option('-p, --port [port]', 'the bot server port', 20001)
   .option('-n, --namebot [name]', 'the name of the bot', 'Bob')
-  .option('-o, --objective [nbOperations]', 'The number of operation', 10)
-  .option('--operation [nbOperations]', 'THe number of operation the bot will make', 10)
-  .option('--deletion [deletion]', 'The probability to have a deletion instead of an insertion', 0)
-  .option('--deplacement [deplacement]', 'The probability to move the cursor', 0)
-  .option('--time [ms]', 'The time between each operations', 1000)
-  .option('--delay [ms]', 'The time before starting', 5000)
-  .option('--address [adr]', 'the adress of the node for exemple ws://[adr]:20001', 'localhost')
-  .option('--buffer [nb]', 'write logs in file every nb operations', 10)
-  .option('--logsnumber [nb]', 'logs every nb operation in the console', 100)
+  .option('-o, --objective [nbOperations]', 'the number of operations of the simulation', 10)
+  .option('--nb-operations [nbOperations]', 'the number of operations the bot will perform', 10)
+  .option(
+    '--deletion [deletion]',
+    'the probability to perform a deletion instead of an insertion',
+    20
+  )
+  .option(
+    '--deplacement [deplacement]',
+    'the probability to move the cursor before each local operation',
+    0
+  )
+  .option('--operation-interval [ms]', 'the time between each operations', 1000)
+  .option('--delay [ms]', 'the initial delay before starting the simulation', 5000)
+  .option('--address [adr]', 'the address of the node, for example ws://[adr]:20001', 'localhost')
+  .option('--buffer [nb]', 'write logs in file every [nb] operations', 10)
+  .option('--log-interval [nb]', 'log every [nb] operation in the console', 100)
   .option(
     '-s, --snapshot [nbOperation]',
     'save a snapshot of the structure every [nbOperation] operations',
@@ -38,7 +46,17 @@ program
   .parse(process.argv)
 
 console.log('Start : port', program.port, ' - master', program.master)
-// new NetworkNode(program.port, program.master, program.port)
+
+const port = parseInt(program.port, 10)
+const objective = parseInt(program.objective, 10)
+const snapshot = parseInt(program.snapshot, 10)
+const buffer = parseInt(program.buffer, 10)
+const logInterval = parseInt(program.logInterval, 10)
+const nbOperations = parseInt(program.nbOperations, 10)
+const operationInterval = parseInt(program.operationInterval, 10)
+const pDeletion = parseInt(program.deletion, 10)
+const pDeplacement = parseInt(program.deplacement, 10)
+const delay = parseInt(program.delay, 10)
 
 let strat = Strategy.LOGOOTSPLIT
 switch (program.strategy) {
@@ -58,25 +76,20 @@ switch (program.strategy) {
 const bot = new BotRandom(
   program.namebot,
   program.master,
-  program.port,
+  port,
   program.address,
-  program.snapshot,
+  snapshot,
   strat,
-  program.buffer,
-  program.logsnumber
+  buffer,
+  logInterval
 )
 
 setTimeout(() => {
-  bot.doChanges(
-    program.operation,
-    parseInt(program.time, 10),
-    program.deletion,
-    program.deplacement
-  )
-}, program.delay)
+  bot.doChanges(nbOperations, operationInterval, pDeletion, pDeplacement)
+}, delay)
 
 const interval = setInterval(() => {
-  if (bot.checkObjective(program.objective)) {
+  if (bot.checkObjective(objective)) {
     clearInterval(interval)
     bot.terminate()
     // Wait for a while before exiting
