@@ -15,7 +15,7 @@ import { appendFileSync, writeFileSync } from 'fs'
 import { LogootSRopes, RenamableReplicableList, Stats } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
-import { bufferTime, map } from 'rxjs/operators'
+import { bufferTime, map, takeWhile } from 'rxjs/operators'
 import { delay, generateMuteCore, random, randomChar } from './helpers'
 import { MessageType, NetworkNode } from './NetworkNode'
 import { Message } from './proto'
@@ -31,6 +31,7 @@ export class BotRandom {
   private mutecore: MuteCoreTypes
   private botname: string
   private snapshot: number
+  private objective: number
   private cptOperation: number
   private cptLocal: number
   private cptRemote: number
@@ -39,6 +40,7 @@ export class BotRandom {
   private buffer: number
   private logsnumber: number
 
+  private isOver: boolean
   private start: boolean
   private messageSubject: Subject<{ streamId: StreamId; content: Uint8Array; senderId: number }>
   private crypto: Symmetric
@@ -51,6 +53,7 @@ export class BotRandom {
     master: string,
     port: number,
     adr: string,
+    objective: number,
     snapshot: number,
     strategy: Strategy,
     buffer: number,
@@ -59,11 +62,13 @@ export class BotRandom {
     this.messageSubject = new Subject()
     this.docChanges = new Subject()
 
+    this.isOver = false
     this.start = true
     this.index = -1
 
     this.botname = botname
     this.snapshot = snapshot
+    this.objective = objective
     this.strategy = strategy
     this.buffer = buffer
     this.logsnumber = logsnumber
@@ -130,10 +135,6 @@ export class BotRandom {
     console.log('FINISH : Waiting for objective...')
   }
 
-  public wait(milisecond: number) {
-    return new Promise((resolve) => setTimeout(resolve, milisecond))
-  }
-
   public send(streamId: number, content: Uint8Array, id?: number) {
     const msg = Message.create({ streamId, content })
     if (id) {
@@ -151,15 +152,12 @@ export class BotRandom {
     }
   }
 
-  public checkObjective(nboperation: number) {
-    if (nboperation > 0) {
-      return this.cptOperation >= nboperation
-    } else {
-      throw new Error('checkObjective : the request number of operation to check is invalid')
-    }
+  public checkObjective(): boolean {
+    return this.cptOperation >= this.objective
   }
 
-  public terminate() {
+  public async terminate() {
+    this.isOver = true
     let stats = ''
     if (this.mutecore.state.sequenceCRDT instanceof LogootSRopes) {
       stats = new Stats(this.mutecore.state.sequenceCRDT).toString()
@@ -179,6 +177,8 @@ export class BotRandom {
       JSON.stringify(data)
     ) */
     console.log('Data Saved')
+    await delay(60000)
+    process.exit(0)
   }
 
   // INIT NETWORK
@@ -252,7 +252,10 @@ export class BotRandom {
     )
 
     this.mutecore.experimentLogs$
-      .pipe(bufferTime(5000, undefined, this.buffer))
+      .pipe(
+        bufferTime(5000, undefined, this.buffer),
+        takeWhile(() => !this.isOver)
+      )
       .subscribe((values) => {
         let str = ''
         values.forEach((value) => {
@@ -299,6 +302,10 @@ export class BotRandom {
           './output/Logs.' + this.botname + '.json',
           str // prefix + JSON.stringify(logs),
         )
+
+        if (this.checkObjective()) {
+          this.terminate()
+        }
       })
 
     this.mutecore.collabJoin$.subscribe(() => {

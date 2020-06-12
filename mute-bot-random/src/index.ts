@@ -78,6 +78,7 @@ const bot = new BotRandom(
   program.master,
   port,
   program.address,
+  objective,
   snapshot,
   strat,
   buffer,
@@ -87,16 +88,3 @@ const bot = new BotRandom(
 setTimeout(() => {
   bot.doChanges(nbOperations, operationInterval, pDeletion, pDeplacement)
 }, delay)
-
-const interval = setInterval(() => {
-  if (bot.checkObjective(objective)) {
-    clearInterval(interval)
-    bot.terminate()
-    // Wait for a while before exiting
-    // Allow to run the anti-entropy mechanism to help other nodes
-    setTimeout(() => {
-      console.log('Exit')
-      process.exit(0)
-    }, 60000)
-  }
-}, 1000)
