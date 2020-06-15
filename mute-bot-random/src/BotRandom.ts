@@ -8,6 +8,7 @@ import {
   TextDelete,
   TextInsert,
 } from '@coast-team/mute-core'
+import { IExperimentLogs } from '@coast-team/mute-core/dist/types/src/misc/IExperimentLogs'
 import { KeyState, Symmetric } from '@coast-team/mute-crypto'
 import { EditableOpAvlList, SimpleDotPos } from 'dotted-logootsplit'
 import { OpEditableReplicatedList } from 'dotted-logootsplit/dist/types/core/op-replicated-list'
@@ -100,12 +101,12 @@ export class BotRandom {
     const currentpDeplacement = pDeplacement
     let currentpDeletion = pDeletion
 
-    console.log('START :')
+    console.log('doChanges(): start')
     let changeState = false
 
     for (let nbLocal = 0; nbLocal < nboperation; nbLocal++) {
       if (this.str.length >= 60000 && !changeState) {
-        console.log('Change rate : 50/50')
+        console.log('doChanges(): changing ratio of local ops to 50/50')
         currentpDeletion = 50
         changeState = true
       }
@@ -132,7 +133,55 @@ export class BotRandom {
       const newTime = time + randomTime
       await delay(newTime)
     }
-    console.log('FINISH : Waiting for objective...')
+    console.log('doChanges(): end')
+  }
+
+  handleExperimentLogs(logs: IExperimentLogs[]) {
+    let str = ''
+    logs.forEach((log) => {
+      let prefix = ',' + os.EOL
+      if (this.start) {
+        prefix = '['
+        this.start = false
+      }
+
+      const { struct, ...otherAttributes } = log
+      str += prefix + JSON.stringify(otherAttributes)
+
+      this.cptOperation++
+      if (log.type === 'local') {
+        this.cptLocal++
+      } else {
+        this.cptRemote++
+      }
+
+      if (this.cptOperation % this.logsnumber === 0) {
+        console.log(
+          `handleExperimentLogs(): ${this.cptOperation}\t(local: ${this.cptLocal}, remote: ${
+            this.cptRemote
+          })`
+        )
+      }
+      if (this.cptOperation % this.snapshot === 0) {
+        writeFileSync(
+          './output/Snapshot.' + this.cptOperation + '.' + this.botname + '.json',
+          JSON.stringify(struct)
+        )
+      }
+      if (
+        this.botname === 'Master' &&
+        this.strategy === Strategy.RENAMABLELOGOOTSPLIT &&
+        this.cptOperation % 30000 === 0
+      ) {
+        console.log('handleExperimentLogs(): triggering rename operation')
+        this.docChanges.next([])
+      }
+    })
+    appendFileSync('./output/Logs.' + this.botname + '.json', str)
+
+    if (this.checkObjective()) {
+      this.terminate()
+    }
   }
 
   public send(streamId: number, content: Uint8Array, id?: number) {
@@ -176,8 +225,9 @@ export class BotRandom {
       './Results.' + this.botname + ':' + this.network.id + '.json',
       JSON.stringify(data)
     ) */
-    console.log('Data Saved')
-    await delay(60000)
+    console.log('terminate(): data saved, waiting a bit before exiting')
+    await delay(60000) // Stay online a bit to synchronise with other nodes if needed
+    console.log('terminate(): exiting')
     process.exit(0)
   }
 
@@ -245,7 +295,7 @@ export class BotRandom {
           } else if (text) {
             return new TextInsert(index, text, this.mutecore.myMuteCoreId)
           } else {
-            throw new Error('Operation not recognize')
+            throw new Error('Operation not recognized')
           }
         })
       })
@@ -256,60 +306,10 @@ export class BotRandom {
         bufferTime(5000, undefined, this.buffer),
         takeWhile(() => !this.isOver)
       )
-      .subscribe((values) => {
-        let str = ''
-        values.forEach((value) => {
-          // console.log(value.operation)
-          let prefix = ',' + os.EOL
-          if (this.start) {
-            prefix = '['
-            this.start = false
-          }
-
-          const { struct, ...logs } = value
-          str += prefix + JSON.stringify(logs)
-
-          this.cptOperation++
-          if (value.type === 'local') {
-            this.cptLocal++
-          } else {
-            this.cptRemote++
-          }
-
-          if (this.cptOperation % this.logsnumber === 0) {
-            console.log(
-              'Operations : ' +
-                this.cptOperation +
-                `\t(local: ${this.cptLocal}, remote : ${this.cptRemote})`
-            )
-          }
-          if (this.cptOperation % this.snapshot === 0) {
-            writeFileSync(
-              './output/Snapshot.' + this.cptOperation + '.' + this.botname + '.json',
-              JSON.stringify(struct)
-            )
-          }
-          if (
-            this.botname === 'Master' &&
-            this.strategy === Strategy.RENAMABLELOGOOTSPLIT &&
-            this.cptOperation % 30000 === 0
-          ) {
-            console.log('Trigger rename')
-            this.docChanges.next([])
-          }
-        })
-        appendFileSync(
-          './output/Logs.' + this.botname + '.json',
-          str // prefix + JSON.stringify(logs),
-        )
-
-        if (this.checkObjective()) {
-          this.terminate()
-        }
-      })
+      .subscribe(this.handleExperimentLogs)
 
     this.mutecore.collabJoin$.subscribe(() => {
-      console.log('New collaborator')
+      console.log('handleNewCollab(): synchronizing with new collaborator')
       this.mutecore.synchronize()
     })
   }
