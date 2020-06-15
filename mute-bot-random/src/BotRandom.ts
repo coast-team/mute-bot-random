@@ -10,10 +10,10 @@ import {
 } from '@coast-team/mute-core'
 import { IExperimentLogs } from '@coast-team/mute-core/dist/types/src/misc/IExperimentLogs'
 import { KeyState, Symmetric } from '@coast-team/mute-crypto'
-import { EditableOpAvlList, SimpleDotPos } from 'dotted-logootsplit'
+import { SimpleDotPos } from 'dotted-logootsplit'
 import { OpEditableReplicatedList } from 'dotted-logootsplit/dist/types/core/op-replicated-list'
 import { appendFileSync, writeFileSync } from 'fs'
-import { LogootSRopes, RenamableReplicableList, Stats } from 'mute-structs'
+import { LogootSRopes, RenamableReplicableList } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
 import { bufferTime, map, takeWhile } from 'rxjs/operators'
@@ -207,26 +207,12 @@ export class BotRandom {
 
   public async terminate() {
     this.isOver = true
-    let stats = ''
-    if (this.mutecore.state.sequenceCRDT instanceof LogootSRopes) {
-      stats = new Stats(this.mutecore.state.sequenceCRDT).toString()
-    } else if (this.mutecore.state.sequenceCRDT instanceof EditableOpAvlList) {
-      stats = 'Not Implemented yet'
-    }
-    const data = {
-      vector: Array.from(this.mutecore.state.vector),
-      sequenceCRDT: this.mutecore.state.sequenceCRDT,
-      stats,
-    }
-    console.log(data.stats)
     appendFileSync('./output/Logs.' + this.botname + '.json', ']')
     writeFileSync('./output/string.' + this.botname + '.txt', this.str)
-    /* await writeFileSync(
-      './Results.' + this.botname + ':' + this.network.id + '.json',
-      JSON.stringify(data)
-    ) */
+
     console.log('terminate(): data saved, waiting a bit before exiting')
     await delay(60000) // Stay online a bit to synchronise with other nodes if needed
+
     console.log('terminate(): exiting')
     process.exit(0)
   }
