@@ -16,16 +16,10 @@ import { appendFileSync, writeFileSync } from 'fs'
 import { LogootSRopes, RenamableReplicableList } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
-import { bufferTime, map, takeWhile } from 'rxjs/operators'
+import { bufferTime, takeWhile } from 'rxjs/operators'
 import { delay, generateMuteCore, random, randomChar } from './helpers'
 import { MessageType, NetworkNode } from './NetworkNode'
 import { Message } from './proto'
-
-export interface IDocContentOperation {
-  index: number
-  text?: string // Present only when it is an Insert operation
-  length?: number // Present only when it is a Delete operation
-}
 
 export class BotRandom {
   private network: NetworkNode
@@ -43,9 +37,9 @@ export class BotRandom {
 
   private isOver: boolean
   private start: boolean
-  private messageSubject: Subject<{ streamId: StreamId; content: Uint8Array; senderId: number }>
+  private messages$: Subject<{ streamId: StreamId; content: Uint8Array; senderId: number }>
   private crypto: Symmetric
-  private docChanges: Subject<IDocContentOperation[]>
+  private localOps$: Subject<Array<TextDelete | TextInsert>>
 
   private index: number
 
@@ -60,8 +54,8 @@ export class BotRandom {
     buffer: number,
     logsnumber: number
   ) {
-    this.messageSubject = new Subject()
-    this.docChanges = new Subject()
+    this.messages$ = new Subject()
+    this.localOps$ = new Subject()
 
     this.isOver = false
     this.start = true
@@ -114,18 +108,16 @@ export class BotRandom {
       const dep = random(99) < currentpDeplacement
       if (dep || this.index === -1) {
         this.index = random(this.str.length)
-        // console.log('---')
       }
 
+      const myId = this.mutecore.myMuteCoreId
       const del = random(99) < currentpDeletion && this.index > 0
       if (del) {
-        // console.log(`Delete ${this.index - 1}`)
-        this.docChanges.next([{ index: this.index - 1, length: 1 }])
+        this.localOps$.next([new TextDelete(this.index - 1, 1, myId)])
         this.index--
       } else {
         const c = randomChar()
-        // console.log(`Insert ${this.index} \t${c}`)
-        this.docChanges.next([{ index: this.index, text: c }])
+        this.localOps$.next([new TextInsert(this.index, c, myId)])
         this.index++
       }
 
@@ -174,7 +166,7 @@ export class BotRandom {
         this.cptOperation % 30000 === 0
       ) {
         console.log('handleExperimentLogs(): triggering rename operation')
-        this.docChanges.next([])
+        this.localOps$.next([])
       }
     })
     appendFileSync('./output/Logs.' + this.botname + '.json', str)
@@ -223,7 +215,7 @@ export class BotRandom {
       const decode = Message.decode(out.message)
       if (decode) {
         // console.log('receive', decode.streamId)
-        this.messageSubject.next({
+        this.messages$.next({
           streamId: { type: decode.streamId, subtype: decode.subtype },
           content: decode.content,
           senderId: out.sender,
@@ -246,7 +238,7 @@ export class BotRandom {
     })
 
     // I/O
-    this.mutecore.messageIn$ = this.messageSubject.asObservable()
+    this.mutecore.messageIn$ = this.messages$.asObservable()
     this.mutecore.messageOut$.subscribe(({ streamId, content, recipientId }) => {
       if (
         streamId.type === MuteCoreStreams.DOCUMENT_CONTENT &&
@@ -273,19 +265,7 @@ export class BotRandom {
       })
     })
 
-    this.mutecore.localTextOperations$ = this.docChanges.asObservable().pipe(
-      map((ops) => {
-        return ops.map(({ index, text, length }) => {
-          if (length) {
-            return new TextDelete(index, length, this.mutecore.myMuteCoreId)
-          } else if (text) {
-            return new TextInsert(index, text, this.mutecore.myMuteCoreId)
-          } else {
-            throw new Error('Operation not recognized')
-          }
-        })
-      })
-    )
+    this.mutecore.localTextOperations$ = this.localOps$
 
     this.mutecore.experimentLogs$
       .pipe(
