@@ -21,6 +21,8 @@ import { delay, generateMuteCore, random, randomChar } from './helpers'
 import { MessageType, NetworkNode } from './NetworkNode'
 import { Message } from './proto'
 
+const renameOpInterval = 10
+
 export class BotRandom {
   private network: NetworkNode
   private mutecore: MuteCoreTypes
@@ -65,6 +67,10 @@ export class BotRandom {
     this.snapshot = snapshot
     this.objective = objective
     this.strategy = strategy
+    if (this.strategy === Strategy.RENAMABLELOGOOTSPLIT) {
+      const nbRenameOps = objective / renameOpInterval
+      this.objective += nbRenameOps
+    }
     this.buffer = buffer
     this.logsnumber = logsnumber
     this.cptOperation = 0
@@ -163,7 +169,7 @@ export class BotRandom {
       if (
         this.botname === 'Master' &&
         this.strategy === Strategy.RENAMABLELOGOOTSPLIT &&
-        this.cptOperation % 30000 === 0
+        this.cptOperation % renameOpInterval === 0
       ) {
         console.log('handleExperimentLogs(): triggering rename operation')
         setTimeout(() => {
