@@ -166,7 +166,9 @@ export class BotRandom {
         this.cptOperation % 30000 === 0
       ) {
         console.log('handleExperimentLogs(): triggering rename operation')
-        this.localOps$.next([])
+        setTimeout(() => {
+          this.localOps$.next([])
+        }, 0)
       }
     })
     appendFileSync('./output/Logs.' + this.botname + '.json', str)
@@ -265,14 +267,16 @@ export class BotRandom {
       })
     })
 
-    this.mutecore.localTextOperations$ = this.localOps$
+    this.mutecore.localTextOperations$ = this.localOps$.asObservable()
 
     this.mutecore.experimentLogs$
       .pipe(
         bufferTime(5000, undefined, this.buffer),
         takeWhile(() => !this.isOver)
       )
-      .subscribe(this.handleExperimentLogs)
+      .subscribe((logs) => {
+        this.handleExperimentLogs(logs)
+      })
 
     this.mutecore.collabJoin$.subscribe(() => {
       console.log('handleNewCollab(): synchronizing with new collaborator')
