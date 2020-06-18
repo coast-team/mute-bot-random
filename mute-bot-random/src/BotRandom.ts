@@ -21,6 +21,7 @@ import { delay, generateMuteCore, random, randomChar } from './helpers'
 import { MessageType, NetworkNode } from './NetworkNode'
 import { Message } from './proto'
 
+const nbRenamingBots = 1
 const renameOpInterval = 10
 
 export class BotRandom {
@@ -44,6 +45,7 @@ export class BotRandom {
   private localOps$: Subject<Array<TextDelete | TextInsert>>
 
   private index: number
+  private isRenamingBot: boolean
 
   constructor(
     botname: string,
@@ -67,10 +69,16 @@ export class BotRandom {
     this.snapshot = snapshot
     this.objective = objective
     this.strategy = strategy
+    this.isRenamingBot = false
+
     if (this.strategy === Strategy.RENAMABLELOGOOTSPLIT) {
-      const nbRenameOps = objective / renameOpInterval
+      const nbRenameOps = (objective / renameOpInterval) * nbRenamingBots
       this.objective += nbRenameOps
+
+      const renamingBotsNames = Array.from({ length: nbRenamingBots }, (_, i) => `Bot${i}`)
+      this.isRenamingBot = renamingBotsNames.includes(this.botname)
     }
+
     this.buffer = buffer
     this.logsnumber = logsnumber
     this.cptOperation = 0
@@ -167,8 +175,8 @@ export class BotRandom {
         )
       }
       if (
-        this.botname === 'Master' &&
         this.strategy === Strategy.RENAMABLELOGOOTSPLIT &&
+        this.isRenamingBot &&
         this.cptOperation % renameOpInterval === 0
       ) {
         console.log('handleExperimentLogs(): triggering rename operation')

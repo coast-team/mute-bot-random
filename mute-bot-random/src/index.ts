@@ -19,7 +19,7 @@ program
   .version(version)
   .option('-m, --master [url]', 'the URL of the master bot')
   .option('-p, --port [port]', 'the bot server port', 20001)
-  .option('-n, --namebot [name]', 'the name of the bot', 'Bob')
+  .option('-n, --namebot [name]', 'the name of the bot', 'Bot0')
   .option('-o, --objective [nbOperations]', 'the number of operations of the simulation', 10)
   .option('--nb-operations [nbOperations]', 'the number of operations the bot will perform', 10)
   .option(
