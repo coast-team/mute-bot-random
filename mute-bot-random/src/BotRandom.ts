@@ -16,7 +16,7 @@ import { appendFileSync, writeFileSync } from 'fs'
 import { LogootSRopes, RenamableReplicableList } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
-import { bufferTime, takeWhile } from 'rxjs/operators'
+import { buffer } from 'rxjs/operators'
 import { delay, generateMuteCore, random, randomChar } from './helpers'
 import { MessageType, NetworkNode } from './NetworkNode'
 import { Message } from './proto'
@@ -35,14 +35,14 @@ export class BotRandom {
   private cptRemote: number
   private strategy: Strategy
 
-  private buffer: number
+  private bufferSize: number
   private logsnumber: number
 
-  private isOver: boolean
   private start: boolean
   private messages$: Subject<{ streamId: StreamId; content: Uint8Array; senderId: number }>
   private crypto: Symmetric
   private localOps$: Subject<Array<TextDelete | TextInsert>>
+  private bufferTrigger$: Subject<void>
 
   private index: number
   private isRenamingBot: boolean
@@ -60,8 +60,8 @@ export class BotRandom {
   ) {
     this.messages$ = new Subject()
     this.localOps$ = new Subject()
+    this.bufferTrigger$ = new Subject()
 
-    this.isOver = false
     this.start = true
     this.index = -1
 
@@ -79,7 +79,7 @@ export class BotRandom {
       this.isRenamingBot = renamingBotsNames.includes(this.botname)
     }
 
-    this.buffer = buffer
+    this.bufferSize = buffer
     this.logsnumber = logsnumber
     this.cptOperation = 0
     this.cptLocal = 0
@@ -142,53 +142,62 @@ export class BotRandom {
     console.log('doChanges(): end')
   }
 
-  handleExperimentLogs(logs: IExperimentLogs[]) {
-    let str = ''
-    logs.forEach((log) => {
-      let prefix = ',' + os.EOL
-      if (this.start) {
-        prefix = '['
-        this.start = false
-      }
+  handleExperimentLog(log: IExperimentLogs) {
+    this.cptOperation++
+    if (log.type === 'local') {
+      this.cptLocal++
+    } else {
+      this.cptRemote++
+    }
 
-      const { struct, ...otherAttributes } = log
-      str += prefix + JSON.stringify(otherAttributes)
+    if (this.cptOperation % this.logsnumber === 0) {
+      console.log(
+        `handleExperimentLog(): ${this.cptOperation}\t(local: ${this.cptLocal}, remote: ${
+          this.cptRemote
+        })`
+      )
+    }
 
-      this.cptOperation++
-      if (log.type === 'local') {
-        this.cptLocal++
-      } else {
-        this.cptRemote++
-      }
+    if (this.cptOperation % this.snapshot === 0) {
+      const filename = `./output/Snapshot.${this.cptOperation}.${this.botname}.json`
+      writeFileSync(filename, JSON.stringify(log.struct))
+    }
 
-      if (this.cptOperation % this.logsnumber === 0) {
-        console.log(
-          `handleExperimentLogs(): ${this.cptOperation}\t(local: ${this.cptLocal}, remote: ${
-            this.cptRemote
-          })`
-        )
-      }
-      if (this.cptOperation % this.snapshot === 0) {
-        writeFileSync(
-          './output/Snapshot.' + this.cptOperation + '.' + this.botname + '.json',
-          JSON.stringify(struct)
-        )
-      }
-      if (
-        this.strategy === Strategy.RENAMABLELOGOOTSPLIT &&
-        this.isRenamingBot &&
-        this.cptOperation % renameOpInterval === 0
-      ) {
-        console.log('handleExperimentLogs(): triggering rename operation')
-        setTimeout(() => {
-          this.localOps$.next([])
-        }, 0)
-      }
-    })
-    appendFileSync('./output/Logs.' + this.botname + '.json', str)
+    if (this.cptOperation % this.bufferSize === 0) {
+      this.bufferTrigger$.next()
+    }
+
+    if (
+      this.strategy === Strategy.RENAMABLELOGOOTSPLIT &&
+      this.isRenamingBot &&
+      this.cptOperation % renameOpInterval === 0
+    ) {
+      console.log('handleExperimentLog(): triggering rename operation')
+      setTimeout(() => {
+        // Trigger rename op from a setTimeout(_, 0) to prevent a nested call of handleExperimentLog()
+        this.localOps$.next([])
+      }, 0)
+    }
 
     if (this.checkObjective()) {
       this.terminate()
+    }
+  }
+
+  saveLogsToFile(logs: IExperimentLogs[]) {
+    if (logs.length > 0) {
+      const prefix = this.start ? '[' : ',' + os.EOL
+      this.start = false
+      const logsAsStr = logs
+        .map((log) => {
+          const { struct, ...otherAttributes } = log
+          return JSON.stringify(otherAttributes)
+        })
+        .join(',' + os.EOL)
+      const str = prefix + logsAsStr
+
+      const filename = `./output/Logs.${this.botname}.json`
+      appendFileSync(filename, str)
     }
   }
 
@@ -214,7 +223,7 @@ export class BotRandom {
   }
 
   public async terminate() {
-    this.isOver = true
+    this.bufferTrigger$.next()
     appendFileSync('./output/Logs.' + this.botname + '.json', ']')
     writeFileSync('./output/string.' + this.botname + '.txt', this.str)
 
@@ -283,14 +292,13 @@ export class BotRandom {
 
     this.mutecore.localTextOperations$ = this.localOps$.asObservable()
 
-    this.mutecore.experimentLogs$
-      .pipe(
-        bufferTime(5000, undefined, this.buffer),
-        takeWhile(() => !this.isOver)
-      )
-      .subscribe((logs) => {
-        this.handleExperimentLogs(logs)
-      })
+    this.mutecore.experimentLogs$.pipe(buffer(this.bufferTrigger$)).subscribe((logs) => {
+      this.saveLogsToFile(logs)
+    })
+
+    this.mutecore.experimentLogs$.subscribe((log) => {
+      this.handleExperimentLog(log)
+    })
 
     this.mutecore.collabJoin$.subscribe(() => {
       console.log('handleNewCollab(): synchronizing with new collaborator')
