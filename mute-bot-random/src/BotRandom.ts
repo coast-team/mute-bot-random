@@ -12,7 +12,7 @@ import { IExperimentLogs } from '@coast-team/mute-core/dist/types/src/misc/IExpe
 import { KeyState, Symmetric } from '@coast-team/mute-crypto'
 import { SimpleDotPos } from 'dotted-logootsplit'
 import { OpEditableReplicatedList } from 'dotted-logootsplit/dist/types/core/op-replicated-list'
-import { appendFileSync, writeFileSync } from 'fs'
+import { createWriteStream, writeFileSync, WriteStream } from 'fs'
 import { LogootSRopes, RenamableReplicableList } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
@@ -36,13 +36,14 @@ export class BotRandom {
   private strategy: Strategy
 
   private bufferSize: number
+  private bufferTrigger$: Subject<void>
   private logsnumber: number
-
+  private logsFD: WriteStream
   private start: boolean
+
   private messages$: Subject<{ streamId: StreamId; content: Uint8Array; senderId: number }>
   private crypto: Symmetric
   private localOps$: Subject<Array<TextDelete | TextInsert>>
-  private bufferTrigger$: Subject<void>
 
   private index: number
   private isRenamingBot: boolean
@@ -98,6 +99,8 @@ export class BotRandom {
 
     console.log(`${this.botname} - State : `, this.str)
     console.log(`${this.botname} - Network : ${this.network.id}`)
+
+    this.logsFD = createWriteStream(`./output/Logs.${this.botname}.json`, { flags: 'a' })
   }
 
   public async doChanges(
@@ -195,9 +198,7 @@ export class BotRandom {
         })
         .join(',' + os.EOL)
       const str = prefix + logsAsStr
-
-      const filename = `./output/Logs.${this.botname}.json`
-      appendFileSync(filename, str)
+      this.logsFD.write(str)
     }
   }
 
@@ -224,7 +225,7 @@ export class BotRandom {
 
   public async terminate() {
     this.bufferTrigger$.next()
-    appendFileSync('./output/Logs.' + this.botname + '.json', ']')
+    this.logsFD.end(']')
     writeFileSync('./output/string.' + this.botname + '.txt', this.str)
 
     console.log('terminate(): data saved, waiting a bit before exiting')
