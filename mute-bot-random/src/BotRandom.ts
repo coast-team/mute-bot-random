@@ -12,7 +12,7 @@ import { IExperimentLogs } from '@coast-team/mute-core/dist/types/src/misc/IExpe
 import { KeyState, Symmetric } from '@coast-team/mute-crypto'
 import { SimpleDotPos } from 'dotted-logootsplit'
 import { OpEditableReplicatedList } from 'dotted-logootsplit/dist/types/core/op-replicated-list'
-import { createWriteStream, writeFileSync, WriteStream } from 'fs'
+import { createWriteStream, writeFile, WriteStream } from 'fs'
 import { LogootSRopes, RenamableReplicableList } from 'mute-structs'
 import * as os from 'os'
 import { Subject } from 'rxjs'
@@ -163,7 +163,12 @@ export class BotRandom {
 
     if (this.cptOperation % this.snapshot === 0) {
       const filename = `./output/Snapshot.${this.cptOperation}.${this.botname}.json`
-      writeFileSync(filename, JSON.stringify(log.struct))
+      writeFile(filename, JSON.stringify(log.struct), (err) => {
+        if (err) {
+          console.error('handleExperimentLog(): encountered error while saving snapshot')
+          console.error(err)
+        }
+      })
     }
 
     if (this.cptOperation % this.bufferSize === 0) {
@@ -226,7 +231,13 @@ export class BotRandom {
   public async terminate() {
     this.bufferTrigger$.next()
     this.logsFD.end(']')
-    writeFileSync('./output/string.' + this.botname + '.txt', this.str)
+    const filename = `./output/string.${this.botname}.txt`
+    writeFile(filename, this.str, (err) => {
+      if (err) {
+        console.error('terminate(): encountered error while saving document')
+        console.error(err)
+      }
+    })
 
     console.log('terminate(): data saved, waiting a bit before exiting')
     await delay(60000) // Stay online a bit to synchronise with other nodes if needed
