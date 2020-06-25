@@ -27,15 +27,11 @@ program
     'the probability to perform a deletion instead of an insertion',
     20
   )
-  .option(
-    '--deplacement [deplacement]',
-    'the probability to move the cursor before each local operation',
-    0
-  )
+  .option('--move [move]', 'the probability to move the cursor before each local operation', 0)
   .option('--operation-interval [ms]', 'the time between each operations', 1000)
   .option('--delay [ms]', 'the initial delay before starting the simulation', 5000)
   .option('--address [adr]', 'the address of the node, for example ws://[adr]:20001', 'localhost')
-  .option('--buffer [nb]', 'write logs in file every [nb] operations', 10)
+  .option('--buffer-size [nb]', 'save logs in file every [nb] operations', 10)
   .option('--log-interval [nb]', 'log every [nb] operation in the console', 100)
   .option(
     '-s, --snapshot [nbOperation]',
@@ -50,12 +46,12 @@ console.log('Start : port', program.port, ' - master', program.master)
 const port = parseInt(program.port, 10)
 const objective = parseInt(program.objective, 10)
 const snapshot = parseInt(program.snapshot, 10)
-const buffer = parseInt(program.buffer, 10)
+const bufferSize = parseInt(program.bufferSize, 10)
 const logInterval = parseInt(program.logInterval, 10)
 const nbOperations = parseInt(program.nbOperations, 10)
 const operationInterval = parseInt(program.operationInterval, 10)
 const pDeletion = parseInt(program.deletion, 10)
-const pDeplacement = parseInt(program.deplacement, 10)
+const pMove = parseInt(program.move, 10)
 const delay = parseInt(program.delay, 10)
 
 let strat = Strategy.LOGOOTSPLIT
@@ -81,10 +77,10 @@ const bot = new BotRandom(
   objective,
   snapshot,
   strat,
-  buffer,
+  bufferSize,
   logInterval
 )
 
 setTimeout(() => {
-  bot.doChanges(nbOperations, operationInterval, pDeletion, pDeplacement)
+  bot.doChanges(nbOperations, operationInterval, pDeletion, pMove)
 }, delay)

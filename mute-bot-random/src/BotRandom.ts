@@ -37,8 +37,8 @@ export class BotRandom {
 
   private bufferSize: number
   private bufferTrigger$: Subject<void>
-  private logsnumber: number
   private logsFD: WriteStream
+  private logInterval: number
   private start: boolean
 
   private messages$: Subject<{ streamId: StreamId; content: Uint8Array; senderId: number }>
@@ -56,8 +56,8 @@ export class BotRandom {
     objective: number,
     snapshot: number,
     strategy: Strategy,
-    buffer: number,
-    logsnumber: number
+    bufferSize: number,
+    logInterval: number
   ) {
     this.messages$ = new Subject()
     this.localOps$ = new Subject()
@@ -80,8 +80,10 @@ export class BotRandom {
       this.isRenamingBot = renamingBotsNames.includes(this.botname)
     }
 
-    this.bufferSize = buffer
-    this.logsnumber = logsnumber
+    this.bufferSize = bufferSize
+    this.logsFD = createWriteStream(`./output/Logs.${this.botname}.json`, { flags: 'a' })
+    this.logInterval = logInterval
+
     this.cptOperation = 0
     this.cptLocal = 0
     this.cptRemote = 0
@@ -99,17 +101,10 @@ export class BotRandom {
 
     console.log(`${this.botname} - State : `, this.str)
     console.log(`${this.botname} - Network : ${this.network.id}`)
-
-    this.logsFD = createWriteStream(`./output/Logs.${this.botname}.json`, { flags: 'a' })
   }
 
-  public async doChanges(
-    nboperation: number,
-    time: number,
-    pDeletion: number,
-    pDeplacement: number
-  ) {
-    const currentpDeplacement = pDeplacement
+  public async doChanges(nboperation: number, time: number, pDeletion: number, pMove: number) {
+    const currentpMove = pMove
     let currentpDeletion = pDeletion
 
     console.log('doChanges(): start')
@@ -122,7 +117,7 @@ export class BotRandom {
         changeState = true
       }
 
-      const dep = random(99) < currentpDeplacement
+      const dep = random(99) < currentpMove
       if (dep || this.index === -1) {
         this.index = random(this.str.length)
       }
@@ -153,7 +148,7 @@ export class BotRandom {
       this.cptRemote++
     }
 
-    if (this.cptOperation % this.logsnumber === 0) {
+    if (this.cptOperation % this.logInterval === 0) {
       console.log(
         `handleExperimentLog(): ${this.cptOperation}\t(local: ${this.cptLocal}, remote: ${
           this.cptRemote
