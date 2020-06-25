@@ -21,7 +21,6 @@ import { delay, generateMuteCore, random, randomChar } from './helpers'
 import { MessageType, NetworkNode } from './NetworkNode'
 import { Message } from './proto'
 
-const nbRenamingBots = 1
 const renameOpInterval = 10
 
 export class BotRandom {
@@ -56,6 +55,7 @@ export class BotRandom {
     objective: number,
     snapshot: number,
     strategy: Strategy,
+    nbRenamingBots: number,
     bufferSize: number,
     logInterval: number
   ) {

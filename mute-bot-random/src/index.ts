@@ -28,6 +28,11 @@ program
     20
   )
   .option('--move [move]', 'the probability to move the cursor before each local operation', 0)
+  .option(
+    '--nb-renaming-bots [nbRenamingBots]',
+    'the number of bots which will issue rename operations',
+    1
+  )
   .option('--operation-interval [ms]', 'the time between each operations', 1000)
   .option('--delay [ms]', 'the initial delay before starting the simulation', 5000)
   .option('--address [adr]', 'the address of the node, for example ws://[adr]:20001', 'localhost')
@@ -52,6 +57,7 @@ const nbOperations = parseInt(program.nbOperations, 10)
 const operationInterval = parseInt(program.operationInterval, 10)
 const pDeletion = parseInt(program.deletion, 10)
 const pMove = parseInt(program.move, 10)
+const nbRenamingBots = parseInt(program.nbRenamingBots, 10)
 const delay = parseInt(program.delay, 10)
 
 let strat = Strategy.LOGOOTSPLIT
@@ -77,6 +83,7 @@ const bot = new BotRandom(
   objective,
   snapshot,
   strat,
+  nbRenamingBots,
   bufferSize,
   logInterval
 )
