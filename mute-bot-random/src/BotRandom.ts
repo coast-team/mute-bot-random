@@ -177,10 +177,7 @@ export class BotRandom {
       this.cptOperation % this.renameOpInterval === 0
     ) {
       console.log('handleExperimentLog(): triggering rename operation')
-      setTimeout(() => {
-        // Trigger rename op from a setTimeout(_, 0) to prevent a nested call of handleExperimentLog()
-        this.localOps$.next([])
-      }, 0)
+      this.localOps$.next([])
     }
 
     if (this.checkObjective()) {
