@@ -19,7 +19,7 @@ function generateCommand(index) {
 
 function generateComposePerBot(index) {
   return `  bot${index}:
-    image: botrandom:2.0.0-1
+    image: botrandom:2.0.0-3
     user: 'node'
     volumes:
       - type: bind
