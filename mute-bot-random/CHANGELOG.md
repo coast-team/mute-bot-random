@@ -1,0 +1,66 @@
+# Change Log
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+<a name="2.0.1"></a>
+
+## [2.0.1](https://github.com/coast-team/mute-bot-random/compare/v1.0.0...v2.0.1) (2021-10-07)
+
+### Bug Fixes
+
+- **bot-random:** increase objective by nb of generated rename operations ([9460521](https://github.com/coast-team/mute-bot-random/commit/9460521))
+- **bot-random:** log properly local rename operations ([f5466ef](https://github.com/coast-team/mute-bot-random/commit/f5466ef))
+- **bot-random:** trigger rename op as soon as possible ([653b3af](https://github.com/coast-team/mute-bot-random/commit/653b3af))
+- **consolelog:** change console's log with local and remote operations, add chmod in start.sh ([a94cb82](https://github.com/coast-team/mute-bot-random/commit/a94cb82))
+- **create-docker-compose:** fix depends_on ([d61fe20](https://github.com/coast-team/mute-bot-random/commit/d61fe20))
+- **createdockerfile:** fix the addresses of the ws server argument ([f2a13f6](https://github.com/coast-team/mute-bot-random/commit/f2a13f6))
+- **package.json:** fix precommit hook ([f839db4](https://github.com/coast-team/mute-bot-random/commit/f839db4))
+- **rls-experimentparts:** fix experiment ([8e54506](https://github.com/coast-team/mute-bot-random/commit/8e54506))
+- **snapshot:** fix asynchronous problem ([1752f51](https://github.com/coast-team/mute-bot-random/commit/1752f51))
+
+### Features
+
+- **bot-random:** add option to choose interval between rename ops ([7852a3d](https://github.com/coast-team/mute-bot-random/commit/7852a3d))
+- **bot-random:** add option to choose nb of bots issuing rename ops ([0edd558](https://github.com/coast-team/mute-bot-random/commit/0edd558))
+- **bot-random:** enable concurrent rename ops ([e4d0ac5](https://github.com/coast-team/mute-bot-random/commit/e4d0ac5))
+- **buffer:** buffer operations before writing logs in file ([321f021](https://github.com/coast-team/mute-bot-random/commit/321f021))
+- **check-validity:** add check on the identifiers order ([955ace9](https://github.com/coast-team/mute-bot-random/commit/955ace9))
+- **check-validity:** add lists of simulations ([71f3589](https://github.com/coast-team/mute-bot-random/commit/71f3589))
+- **create-docker-compose:** simplify required config ([ff8b036](https://github.com/coast-team/mute-bot-random/commit/ff8b036))
+- **docker-compose:** add docker-compose-rls-150k-10b ([5bd5ab3](https://github.com/coast-team/mute-bot-random/commit/5bd5ab3))
+- **dockerfile:** now the service name is the botname choosen in the config file ([32c5a1d](https://github.com/coast-team/mute-bot-random/commit/32c5a1d))
+- **dotted:** add dottedLogootsplit ([8180060](https://github.com/coast-team/mute-bot-random/commit/8180060))
+- **exploit:** add configuration file for result-exploit ([81e72df](https://github.com/coast-team/mute-bot-random/commit/81e72df))
+- **figures:** add scripts to generate plots of the snapshot sizes ([6d8a7d2](https://github.com/coast-team/mute-bot-random/commit/6d8a7d2))
+- **figures:** generate plot of the integration times of local ops ([ffd60ce](https://github.com/coast-team/mute-bot-random/commit/ffd60ce))
+- **figures:** generate plot of the integration times of remote ops ([8a4c59b](https://github.com/coast-team/mute-bot-random/commit/8a4c59b))
+- **figures:** generate plot of the integration times of rename ops ([7d9b239](https://github.com/coast-team/mute-bot-random/commit/7d9b239))
+- **generate-snapshots:** add script to generate intermediate snapshots ([e4ae6f2](https://github.com/coast-team/mute-bot-random/commit/e4ae6f2))
+- **integration-times:** aggregate results into a single file ([26e27b8](https://github.com/coast-team/mute-bot-random/commit/26e27b8))
+- **integration-times-insert:** merge scripts for LS/RLS & add new stats ([b0f0177](https://github.com/coast-team/mute-bot-random/commit/b0f0177))
+- **integration-times-rename:** add new stats ([311cc1c](https://github.com/coast-team/mute-bot-random/commit/311cc1c))
+- **logs:** display the number of operation integrated instead of only local ([566823d](https://github.com/coast-team/mute-bot-random/commit/566823d))
+- **mute-bot-random:** add support for RenamableLogootSplit ([c636f78](https://github.com/coast-team/mute-bot-random/commit/c636f78))
+- **mute-bot-random:** replace bufferCount with bufferTime ([49a6de3](https://github.com/coast-team/mute-bot-random/commit/49a6de3))
+- **mute-bot-random:** wait 60 before exiting process once terminated ([686df31](https://github.com/coast-team/mute-bot-random/commit/686df31))
+- **mute-bot-random:** write final content to file before exiting ([5cdd4d9](https://github.com/coast-team/mute-bot-random/commit/5cdd4d9))
+- **mutecore:** update mute-core with the new experimental version ([8b3263c](https://github.com/coast-team/mute-bot-random/commit/8b3263c))
+- **network:** fix neighbour's list bug, add reconnection attempt ([5936421](https://github.com/coast-team/mute-bot-random/commit/5936421))
+- **network:** increase the number of try to connect bots each other ([d205d5f](https://github.com/coast-team/mute-bot-random/commit/d205d5f))
+- **package:** update mute-core ([1dbdd8a](https://github.com/coast-team/mute-bot-random/commit/1dbdd8a))
+- **package:** update mute-core and add chmod line in start.sh ([33649c9](https://github.com/coast-team/mute-bot-random/commit/33649c9))
+- **param:** add two parametters for buffer and logsnumber ([81553e6](https://github.com/coast-team/mute-bot-random/commit/81553e6))
+- **resultexploit:** add script to run ressults-exploit in a docker container ([26357a0](https://github.com/coast-team/mute-bot-random/commit/26357a0))
+- **results-exploit:** add script to compute sizes of snapshots ([98af319](https://github.com/coast-team/mute-bot-random/commit/98af319))
+- **results-exploit:** add script to replay a log ([b756b26](https://github.com/coast-team/mute-bot-random/commit/b756b26))
+- **results-exploit:** add script to validate simulation outputs ([d10c311](https://github.com/coast-team/mute-bot-random/commit/d10c311))
+- **results-exploit:** compute integration times of ops on LS documents ([5e548cf](https://github.com/coast-team/mute-bot-random/commit/5e548cf))
+- **results-exploit:** compute integration times of ops on RLS documents ([a82817b](https://github.com/coast-team/mute-bot-random/commit/a82817b))
+- **results-exploit:** compute integration times of rename ops ([ffcc627](https://github.com/coast-team/mute-bot-random/commit/ffcc627))
+- **snapshot-sizes:** add output file ([765fcf6](https://github.com/coast-team/mute-bot-random/commit/765fcf6))
+- **snapshot-sizes:** add plots derivated from new results ([af9b3d2](https://github.com/coast-team/mute-bot-random/commit/af9b3d2))
+- **snapshot-sizes:** update script to support several renaming bots ([3545e7c](https://github.com/coast-team/mute-bot-random/commit/3545e7c))
+- **snapshot-sizes:** update seaborn script to support nbRenamingBots ([db3317b](https://github.com/coast-team/mute-bot-random/commit/db3317b))
+- **start:** simplify script ([a3b5036](https://github.com/coast-team/mute-bot-random/commit/a3b5036))
+- **stats:** add script for computing stats on integration times ([33241be](https://github.com/coast-team/mute-bot-random/commit/33241be))
+- **strategy:** add strategy option in the experiment configuration ([ac78320](https://github.com/coast-team/mute-bot-random/commit/ac78320))

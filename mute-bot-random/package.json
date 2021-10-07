@@ -1,6 +1,6 @@
 {
   "name": "mute-bot-random",
-  "version": "2.0.0-3",
+  "version": "2.0.1",
   "description": "",
   "main": "dist/bot-random.js",
   "scripts": {
@@ -13,8 +13,8 @@
     "cz": "git-cz",
     "precommit": "lint-staged && npm run build",
     "commitmsg": "commitlint -e $GIT_PARAMS",
-    "prerelease": "npm run build && git add dist/*",
-    "release": "standard-version --no-verify"
+    "prerelease": "npm run build",
+    "release": "standard-version"
   },
   "files": [
     "dist/"
