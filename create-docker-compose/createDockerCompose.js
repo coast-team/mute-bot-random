@@ -23,7 +23,7 @@ function generateComposePerBot(index) {
     user: 'node'
     volumes:
       - type: bind
-        source: ../../Results/\${BOTRANDOM_EXPERIMENT_NAME}
+        source: ../../../Results/\${BOTRANDOM_EXPERIMENT_NAME}
         target: /home/node/app/output
     deploy:
       restart_policy:
