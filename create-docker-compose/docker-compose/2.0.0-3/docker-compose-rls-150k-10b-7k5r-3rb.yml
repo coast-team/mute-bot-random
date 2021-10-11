@@ -1,0 +1,152 @@
+version: '3.2'
+services:
+  bot0:
+    image: botrandom:2.0.0-3
+    user: 'node'
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot0  --address bot0 -p 20001 --delay 10000 --strategy rls -o 150000 --nb-operations 15000 --operation-interval 200 --deletion 20 --move 5 --nb-renaming-bots 3 --rename-op-interval 7500 --snapshot 2500 --buffer-size 10000 --log-interval 10000
+  bot1:
+    image: botrandom:2.0.0-3
+    user: 'node'
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot1 -m ws://bot0:20001 --address bot1 -p 20001 --delay 10000 --strategy rls -o 150000 --nb-operations 15000 --operation-interval 200 --deletion 20 --move 5 --nb-renaming-bots 3 --rename-op-interval 7500 --snapshot 2500 --buffer-size 10000 --log-interval 10000
+  bot2:
+    image: botrandom:2.0.0-3
+    user: 'node'
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot2 -m ws://bot0:20001 --address bot2 -p 20001 --delay 10000 --strategy rls -o 150000 --nb-operations 15000 --operation-interval 200 --deletion 20 --move 5 --nb-renaming-bots 3 --rename-op-interval 7500 --snapshot 2500 --buffer-size 10000 --log-interval 10000
+  bot3:
+    image: botrandom:2.0.0-3
+    user: 'node'
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot3 -m ws://bot0:20001 --address bot3 -p 20001 --delay 10000 --strategy rls -o 150000 --nb-operations 15000 --operation-interval 200 --deletion 20 --move 5 --nb-renaming-bots 3 --rename-op-interval 7500 --snapshot 2500 --buffer-size 10000 --log-interval 10000
+  bot4:
+    image: botrandom:2.0.0-3
+    user: 'node'
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot4 -m ws://bot0:20001 --address bot4 -p 20001 --delay 10000 --strategy rls -o 150000 --nb-operations 15000 --operation-interval 200 --deletion 20 --move 5 --nb-renaming-bots 3 --rename-op-interval 7500 --snapshot 2500 --buffer-size 10000 --log-interval 10000
+  bot5:
+    image: botrandom:2.0.0-3
+    user: 'node'
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot5 -m ws://bot0:20001 --address bot5 -p 20001 --delay 10000 --strategy rls -o 150000 --nb-operations 15000 --operation-interval 200 --deletion 20 --move 5 --nb-renaming-bots 3 --rename-op-interval 7500 --snapshot 2500 --buffer-size 10000 --log-interval 10000
+  bot6:
+    image: botrandom:2.0.0-3
+    user: 'node'
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot6 -m ws://bot0:20001 --address bot6 -p 20001 --delay 10000 --strategy rls -o 150000 --nb-operations 15000 --operation-interval 200 --deletion 20 --move 5 --nb-renaming-bots 3 --rename-op-interval 7500 --snapshot 2500 --buffer-size 10000 --log-interval 10000
+  bot7:
+    image: botrandom:2.0.0-3
+    user: 'node'
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot7 -m ws://bot0:20001 --address bot7 -p 20001 --delay 10000 --strategy rls -o 150000 --nb-operations 15000 --operation-interval 200 --deletion 20 --move 5 --nb-renaming-bots 3 --rename-op-interval 7500 --snapshot 2500 --buffer-size 10000 --log-interval 10000
+  bot8:
+    image: botrandom:2.0.0-3
+    user: 'node'
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot8 -m ws://bot0:20001 --address bot8 -p 20001 --delay 10000 --strategy rls -o 150000 --nb-operations 15000 --operation-interval 200 --deletion 20 --move 5 --nb-renaming-bots 3 --rename-op-interval 7500 --snapshot 2500 --buffer-size 10000 --log-interval 10000
+  bot9:
+    image: botrandom:2.0.0-3
+    user: 'node'
+    volumes:
+      - type: bind
+        source: ../../Results/${BOTRANDOM_EXPERIMENT_NAME}
+        target: /home/node/app/output
+    deploy:
+      restart_policy:
+        condition: none
+    command:
+      - bash
+      - -c
+      - |
+        npm start -- -n Bot9 -m ws://bot0:20001 --address bot9 -p 20001 --delay 10000 --strategy rls -o 150000 --nb-operations 15000 --operation-interval 200 --deletion 20 --move 5 --nb-renaming-bots 3 --rename-op-interval 7500 --snapshot 2500 --buffer-size 10000 --log-interval 10000

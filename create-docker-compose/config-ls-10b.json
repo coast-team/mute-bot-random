@@ -1,0 +1,12 @@
+{
+  "nbBots": 10,
+  "delay": 60000,
+  "objective": 150000,
+  "operationInterval": 200,
+  "deletion": 20,
+  "move": 5,
+  "strategy": "ls",
+  "snapshot": 10000,
+  "bufferSize": 3000,
+  "logInterval": 1000
+}

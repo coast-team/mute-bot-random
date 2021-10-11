@@ -1,0 +1,14 @@
+{
+  "nbBots": 10,
+  "delay": 10000,
+  "objective": 150000,
+  "operationInterval": 200,
+  "deletion": 20,
+  "move": 5,
+  "strategy": "rls",
+  "nbRenamingBots": 4,
+  "renameOpInterval": 30000,
+  "snapshot": 10000,
+  "bufferSize": 10000,
+  "logInterval": 10000
+}
