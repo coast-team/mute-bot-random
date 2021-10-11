@@ -1,3 +1,9 @@
+wip-results/
+
+# Do not add archives of docker images to repo
+botrandom-*.tar
+botrandom-*.tar.gz
+
 # Prevent snapshots to be added to the repository
 results/*/snapshots/**/*.json
 
