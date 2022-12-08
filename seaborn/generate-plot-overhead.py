@@ -34,6 +34,6 @@ res.set_axis_labels("Number of operations (thousands)", "Size (MB)")
 # res.set(xscale="log")
 # res.set_axis_labels("Size (Mo)", "Number of operations (thousands)")
 
-res.fig.savefig("../results/150k-op-10-nodes-80-20-until-60k-char-then-50-50/figures/overhead-size.pdf", format="pdf", transparent="True", bbox_inches="tight")
+res.fig.savefig("../results/150k-op-10-nodes-80-20-until-60k-char-then-50-50/figures/ls-only-overhead-size.pdf", format="pdf", transparent="True", bbox_inches="tight")
 
 

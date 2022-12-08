@@ -1,5 +1,6 @@
-import pandas
+import pandas as pd
 import matplotlib
+import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -11,31 +12,29 @@ sns.set_style("whitegrid")
 darkBlue = "#2171b5"
 lightOrange = "#fdae61"
 
-order = ["local", "localWithRename"]
+order = ["localLS", "localRLS"]
 labels = ["LogootSplit", "RenamableLogootSplit"]
-palette = {"local": lightOrange, "localWithRename": darkBlue}
+palette = {"localLS": lightOrange, "localRLS": darkBlue}
 
-df = pandas.read_csv("../results/150k-op-10-nodes-80-20-until-60k-char-then-50-50/integration-times/integration-times-2020-01-07.csv")
+df = pd.read_csv("../wip-results/integration-times-insert-op.csv")
 
 df.nbOpes = df.nbOpes.div(1000)
 df.nbOpes = df.nbOpes.astype(int)
 df.time = df.time.div(1000)
 
 # Keep only local operations
-df = df.loc[(df.nbOpes % 10 == 0) & ((df.type == "local") | (df.type == "localWithRename"))]
+df = df.loc[(df.nbOpes % 10 == 0) & ((df.type == "localLS") | (df.type == "localRLS"))]
 
-res = sns.catplot(x="nbOpes", y="time", hue="type", kind="box", fliersize=0, data=df, hue_order=order, palette=palette, legend=False)
+res = sns.catplot(x="nbOpes", y="time", hue="type", kind="box", fliersize=0, data=df, hue_order=order, palette=palette, legend=False, aspect=1.5)
 
 res.set_axis_labels("Number of operations (thousands)", "Integration time (µs)")
 res.set(ylim=(0, 300))
 
-res.ax.axvline(2.5, color="gray", linestyle="--")
-res.ax.axvline(5.5, color="gray", linestyle="--")
-res.ax.axvline(8.5, color="gray", linestyle="--")
-res.ax.axvline(11.5, color="gray", linestyle="--")
+for i in range(5):
+    res.ax.add_patch(patches.Rectangle((2.4 + 3 * i, 0), 0.5, 600, color='gray', alpha=0.3, zorder=-1))
 
 handles, _ = res.ax.get_legend_handles_labels()
 res.ax.legend(handles=handles, labels=labels, loc="lower center", ncol=2)
 
-res.fig.savefig("../results/150k-op-10-nodes-80-20-until-60k-char-then-50-50/figures/integration-time-boxplot-local-operations-without-outliers.pdf", format="pdf", transparent=True, bbox_inches="tight")
+res.fig.savefig("../wip-results/integration-time-boxplot-local-operations-without-outliers.pdf", format="pdf", transparent=True)
 
